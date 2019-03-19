@@ -1,0 +1,19 @@
+#Input file for NUDE SC-WFNS post processing program:
+#nat       nrotrasl
+ 3          6
+#Effective harmonic basis size:
+6
+#Number of grid point in each direction (odd integer numbers)
+81 81 81
+#Number of MC steps to be performed:
+1000
+#Name of file with xyz equilibrium geometry
+h2o_eq.xyz
+#Name of file with cnorm matrix 
+cnorm.dat
+#Name of file with harmonic vibrational frequencies
+omegas.dat
+#Name of file with SC wfn 
+wfn.dat
+#AGGIUNGERE FILE CON BASIS SET (e togliere Effective harmonic basis set)
+
