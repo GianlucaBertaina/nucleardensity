@@ -1,6 +1,7 @@
 *.o
 *.mod
 *.exe
+*.x
 !/example/run_H2O_ZPE/
 /example/*/traj.xyz
 /example/*/expectation*
