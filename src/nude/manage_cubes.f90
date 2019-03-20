@@ -162,13 +162,15 @@
         !associate a unit to the cube file
         OPEN (UNIT=unit_cube, FILE=filename, STATUS='replace')
 
-        ! write out cube file "introdction"
-        ! Wriete somethig useful in comment lines TBD
-        WRITE(unit_cube,*) "!comment"
-        WRITE(unit_cube,*) "!comment"
-        WRITE(unit_cube,*) nat, -cubelmax,&
-                                -cubelmax,&
-                                -cubelmax
+        ! write out cube file introduction
+        WRITE(unit_cube,*) "!Cube format assumes densities are printed at vertices of cubes"
+        WRITE(unit_cube,*) "!voxels index order: Z, Y, X"
+        ! Shifts origin of box (vertex of box) so that it corresponds to the center of 
+        ! the first cube in this program convention
+        ! TODO: do not shift if the main routine is modified to evaluate densities at vertices
+        WRITE(unit_cube,*) nat, -cubelmax + dx*0.5d0 ,&
+                                -cubelmax + dy*0.5d0 ,&
+                                -cubelmax + dz*0.5d0 
         WRITE(unit_cube,*) nxpoints, dx, zero_real, zero_real
         WRITE(unit_cube,*) nypoints, zero_real, dy, zero_real
         WRITE(unit_cube,*) nzpoints, zero_real, zero_real, dz
