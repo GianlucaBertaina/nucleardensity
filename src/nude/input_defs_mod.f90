@@ -38,7 +38,7 @@
 !!!!!! from file with wavefunction !!!!      
       !
       integer, allocatable, dimension(:,:) :: h_vec
-      real*8, allocatable, dimension(:)   :: ener_h, coef 
+      real*8, allocatable, dimension(:)   :: coef 
       !
       contains
 
@@ -336,7 +336,6 @@
       !
       allocate(h_vec(nvib,dim_K))
       allocate(coef(dim_K))
-      allocate(ener_h(dim_K))
       !
       !
       open(unit_wfn,file=trim(file_wfn),status='old', action="read")
@@ -345,7 +344,7 @@
       read(unit_wfn,*) ! two lines for comments
       read(unit_wfn,*)
       do K = 1, dim_K
-          read(unit_wfn,*) h_vec(:,K), coef(K), ener_h(K)
+          read(unit_wfn,*) h_vec(:,K), coef(K)
       enddo
       !
       !
