@@ -1,7 +1,8 @@
 fc=gfortran
 myflgs = -fno-automatic -fcheck=bounds -W -O3
-lib = -L/home/marcom/LAPACK/lapack-3.6.0 -llapack -L/home/marcom/BLAS/BLAS-3.6.0 -lblas -llapack -lblas
-#lib = -lblas -llapack 
+# before compiling, please export LAPACK_LIB=path_of_lapack and export BLAS_LIB=path_of_blas
+#lib = -L$(LAPACK_LIB) -llapack -L$(BLAS_LIB) -lblas  
+lib = 
 
 obj =   \
 	constants_mod.o\
@@ -11,6 +12,8 @@ obj =   \
 	hermite.o\
 	calc_wfn.o\
 	nude.o
+
+all: compila
 
 compila: $(obj)  
 	$(fc) $(myflgs) $(obj) -o nude.exe $(lib)
