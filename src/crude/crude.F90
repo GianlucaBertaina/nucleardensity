@@ -458,9 +458,9 @@
            !END IF
 
            ix = NINT(x / dx)
+           ix = (nxpoints + 1) / 2 + ix
            IF (ix > nxpoints) ix = ix - 1
            IF (ix < 1) ix = ix + 1
-           ix = (nxpoints + 1) / 2 + ix
 
            !along y
            !IF (y >= 0) THEN
@@ -472,9 +472,9 @@
            !END IF
 
            iy = NINT(y / dy)
+           iy = (nypoints + 1) / 2 + iy
            IF (iy > nypoints) iy = iy - 1
            IF (iy < 1) iy = iy + 1
-           iy = (nypoints + 1) / 2 + iy
 
            !along z
            !IF (z>= 0) THEN
@@ -486,9 +486,9 @@
            !END IF
 
            iz = NINT(z / dz)
+           iz = (nzpoints + 1) / 2 + iz
            IF (iz > nzpoints) iz = iz - 1
            IF (iz < 1) iz = iz + 1
-           iz = (nzpoints + 1) / 2 + iz
 
       END SUBROUTINE find_cube_index
 
