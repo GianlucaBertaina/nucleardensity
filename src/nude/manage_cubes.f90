@@ -142,25 +142,16 @@
         implicit none
 
         REAL*8, intent(in) :: density(nxpoints, nypoints, nzpoints, nat)
-        character(12) :: filename
+        character(25) :: filename
         integer :: i, j, k, iat
 
       DO iat=1, nat
 
         !Preparing filename string
-        10 FORMAT ('nucl_',I1,'.cube')
-        11 FORMAT ('nucl_',I2,'.cube')
-        IF (nat < 10)  THEN
-           WRITE(filename, 10) iat
-        ELSE IF (nat < 100) THEN
-           WRITE(filename, 11) iat
-        ELSE
-           PRINT*, "Nuclei >= 100 are too many for nude. Stopping program."
-           STOP
-        END IF
+        WRITE(filename, "('nucl_',I0,'.cube')") iat
         
         !associate a unit to the cube file
-        OPEN (UNIT=unit_cube, FILE=filename, STATUS='replace')
+        OPEN (UNIT=unit_cube, FILE=trim(filename), STATUS='replace')
 
         ! write out cube file introduction
         WRITE(unit_cube,*) "!Cube format assumes densities are printed at vertices of cubes"
@@ -207,25 +198,16 @@
         implicit none
 
         REAL*8, intent(in) :: density(nxpoints, nypoints, nzpoints, nat)
-        character(16) :: filename
+        character(25) :: filename
         integer :: i, j, k, iat
 
       DO iat=1, nat
 
         !Preparing filename string
-        10 FORMAT ('err_nucl',I1,'.cube')
-        11 FORMAT ('err_nucl',I2,'.cube')
-        IF (nat < 10)  THEN
-           WRITE(filename, 10) iat
-        ELSE IF (nat < 100) THEN
-           WRITE(filename, 11) iat
-        ELSE
-           PRINT*, "Nuclei >= 100 are too many for nude. Stopping program."
-           STOP
-        END IF
+        WRITE(filename, "('err_nucl_',I0,'.cube')") iat
         
         !associate a unit to the cube file
-        OPEN (UNIT=unit_cube, FILE=filename, STATUS='replace')
+        OPEN (UNIT=unit_cube, FILE=trim(filename), STATUS='replace')
 
         ! write out cube file "introdction"
         ! Wriete somethig useful in comment lines TBD
