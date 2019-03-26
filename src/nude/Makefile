@@ -1,4 +1,5 @@
-fc=gfortran
+#fc=gfortran
+fc=mpif90
 myflgs = -fno-automatic -fcheck=bounds -W -O3
 # before compiling, please export LAPACK_LIB=path_of_lapack and export BLAS_LIB=path_of_blas
 #lib = -L$(LAPACK_LIB) -llapack -L$(BLAS_LIB) -lblas  

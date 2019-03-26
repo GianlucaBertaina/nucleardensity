@@ -1,5 +1,6 @@
    PROGRAM NUDE
 
+      include "mpif.h"
       use constants
       use io_units_def
       use input_def
