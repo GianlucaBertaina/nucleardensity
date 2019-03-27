@@ -69,10 +69,10 @@
         dy = cubelmax*2 / REAL(nypoints, 8)
         dz = cubelmax*2 / REAL(nzpoints, 8)
 
-        print*, 'Voxels edges lenght (a.u.)'
-        print*, 'dx =', dx
-        print*, 'dy =', dy
-        print*, 'dz =', dz
+        !print*, 'Voxels edges lenght (a.u.)'
+        !print*, 'dx =', dx
+        !print*, 'dy =', dy
+        !print*, 'dz =', dz
 
    END SUBROUTINE set_cube
 

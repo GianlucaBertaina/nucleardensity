@@ -229,9 +229,9 @@
          !
          q_expect_value_red(4:9) = q_eq(4:9)
          q_expect_value_h_red(4:9) = q_eq(4:9)
-         print*, 'q_eq    = ', q_eq
-         print*, 'q_exp_h = ', q_expect_value_h_red
-         print*, 'q_exp   = ', q_expect_value_red
+         !print*, 'q_eq    = ', q_eq
+         !print*, 'q_exp_h = ', q_expect_value_h_red
+         !print*, 'q_exp   = ', q_expect_value_red
 
          ! Bring back structures in cartesian coordinates
          call to_cartesian(x_expect_value,  q_expect_value_red)
