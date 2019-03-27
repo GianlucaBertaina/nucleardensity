@@ -45,27 +45,27 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
       subroutine get_input_params
       ! main subroutine calling the others in this module in the right order 
-      !
+      ! Print status sentences commented out for parrallel execution
       !
       !
       implicit none
       !
-      print*, '    reading parameters from file input_nude.dat' 
+      !print*, '    reading parameters from file input_nude.dat' 
       call read_input
       !
-      print*, '    getting strcture masses from eq geometry frame:' 
+      !print*, '    getting strcture masses from eq geometry frame:' 
       allocate(symb_list(nat))
       allocate(xm_sqrt(ncart))
       allocate(x_eq_cart(ncart))
       call get_geo_symb_mas(x_eq_cart,symb_list,xm_sqrt)
       !
-      print*, '    getting omegas:' 
+      !print*, '    getting omegas:' 
       call get_omega
       !
-      print*, '    getting cnorm matrix:' 
+      !print*, '    getting cnorm matrix:' 
       call get_cnorm
       !
-      print*, '    getting vibrational wavefunction:' 
+      !print*, '    getting vibrational wavefunction:' 
       call get_wfn
       !
       !
@@ -149,7 +149,8 @@
       !
       inquire(file=trim(file_geo), exist=file_exists)
       if (.not.file_exists) then
-        print*, "Missing file with molecular geometry at equilibrium. Stopping program"
+        print*, "Missing file with molecular geometry at equilibrium."
+        print*,  "Stopping program"
 	STOP
       endif
       !
@@ -161,7 +162,8 @@
       !
       inquire(file=trim(file_omega), exist=file_exists)
       if (.not.file_exists) then
-        print*, "Missing file with harmonic frequencies. Stopping program"
+        print*, "Missing file with harmonic frequencies." 
+        print*, "Stopping program"
 	STOP
       endif
       !

@@ -9,7 +9,7 @@
        integer,   parameter   :: unit_omega            = 33
        integer,   parameter   :: unit_cnorm            = 34
        integer,   parameter   :: unit_wfn              = 35
-       integer,   parameter   :: unit_trajMC           = 36
+       integer,   parameter   :: unit_trajMC           = 360
        integer,   parameter   :: unit_cube             = 37
        integer,   parameter   :: unit_geo_exp          = 38
        integer,   parameter   :: unit_geo_exp_h        = 39 
