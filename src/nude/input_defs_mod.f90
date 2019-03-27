@@ -17,7 +17,7 @@
       integer :: dim_K
       integer :: Nsteps_MC
       integer :: nxpoints, nypoints, nzpoints
-      integer :: switch_harm
+      integer :: switch_harm, switch_print_mctraj
       character (len=80) :: file_geo, file_cnorm
       character (len=80) :: file_wfn, file_omega
       !
@@ -118,6 +118,8 @@
       read(unit_input,*) file_wfn ! file with SC wavefunction 
       read(unit_input,*) ! Here a comment line
       read(unit_input,*) switch_harm! Harmonic 1 / Hanaramonic /=1 
+      read(unit_input,*) ! Here a comment line
+      read(unit_input,*) switch_print_mctraj! Print Mc traj 1 / Don't print /=1 
       !
       close(unit_input)
 
