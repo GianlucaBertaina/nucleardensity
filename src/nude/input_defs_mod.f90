@@ -335,7 +335,7 @@
 
       implicit none
 
-      integer :: K
+      integer :: K, indx
       !
       !
       allocate(h_vec(nvib,dim_K))
@@ -345,10 +345,15 @@
       open(unit_wfn,file=trim(file_wfn),status='old', action="read")
       !
       !
-      read(unit_wfn,*) ! two lines for comments
+      read(unit_wfn,*) ! seven lines for comments
+      read(unit_wfn,*)
+      read(unit_wfn,*)
+      read(unit_wfn,*)
+      read(unit_wfn,*)
+      read(unit_wfn,*)
       read(unit_wfn,*)
       do K = 1, dim_K
-          read(unit_wfn,*) h_vec(:,K), coef(K)
+          read(unit_wfn,*) indx, h_vec(:,K), coef(K)
       enddo
       !
       !
