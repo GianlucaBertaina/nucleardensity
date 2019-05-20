@@ -7,3 +7,10 @@
 /example/*/expectation*
 /example/*/*.cube
 /example/*/*.txt
+/.ptp-sync
+/.ptp-sync/*
+/.project
+/.cproject
+/.settings
+/.settings/*
+.ptp-sync-folder
