@@ -159,20 +159,19 @@
         ! Shifts origin of box (vertex of box) so that it corresponds to the center of 
         ! the first cube in this program convention
         ! TODO: do not shift if the main routine is modified to evaluate densities at vertices
-        WRITE(unit_cube,*) nat, -cubelmax + dx*0.5d0 ,&
-                                -cubelmax + dy*0.5d0 ,&
-                                -cubelmax + dz*0.5d0 
-        WRITE(unit_cube,*) nxpoints, dx, zero_real, zero_real
-        WRITE(unit_cube,*) nypoints, zero_real, dy, zero_real
-        WRITE(unit_cube,*) nzpoints, zero_real, zero_real, dz
+
+        WRITE(unit_cube,"(1I5,3(1ES22.15,1x))") nat, -cubelmax + dx*0.5d0 ,&
+                                                     -cubelmax + dy*0.5d0 ,&
+                                                     -cubelmax + dz*0.5d0
+        WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nxpoints, dx, zero_real, zero_real
+        WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nypoints, zero_real, dy, zero_real
+        WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nzpoints, zero_real, zero_real, dz
 
 
 !        Print out the equilibrium geometry of the molecule
          DO i=1, nat
-            WRITE(unit_cube,*) Z_nuclei(i), real(Z_nuclei(i),8), &
-                        x_eq_cart(3*i-2),&
-                        x_eq_cart(3*i-1),&
-                        x_eq_cart(3*i)  
+            WRITE(unit_cube,"(1I4,4(1ES22.15,1x))") Z_nuclei(i), real(Z_nuclei(i),8), &
+                                                                 x_eq_cart(3*i-2:3*i)
          END DO
 
          DO i=1, nxpoints
@@ -213,20 +212,18 @@
         ! Wriete somethig useful in comment lines TBD
         WRITE(unit_cube,*) "!comment"
         WRITE(unit_cube,*) "!comment"
-        WRITE(unit_cube,*) nat, -cubelmax,&
-                                -cubelmax,&
-                                -cubelmax
-        WRITE(unit_cube,*) nxpoints, dx, zero_real, zero_real
-        WRITE(unit_cube,*) nypoints, zero_real, dy, zero_real
-        WRITE(unit_cube,*) nzpoints, zero_real, zero_real, dz
 
+        WRITE(unit_cube,"(1I5,3(1ES22.15,1x))") nat, -cubelmax + dx*0.5d0 ,&
+                                                     -cubelmax + dy*0.5d0 ,&
+                                                     -cubelmax + dz*0.5d0
+        WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nxpoints, dx, zero_real, zero_real
+        WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nypoints, zero_real, dy, zero_real
+        WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nzpoints, zero_real, zero_real, dz
 
 !        Print out the equilibrium geometry of the molecule
          DO i=1, nat
-            WRITE(unit_cube,*) Z_nuclei(i), real(Z_nuclei(i),8), &
-                        x_eq_cart(3*i-2),&
-                        x_eq_cart(3*i-1),&
-                        x_eq_cart(3*i)  
+            WRITE(unit_cube,"(1I4,4(1ES22.15,1x))") Z_nuclei(i), real(Z_nuclei(i),8), &
+                                                                 x_eq_cart(3*i-2:3*i)
          END DO
 
          DO i=1, nxpoints
