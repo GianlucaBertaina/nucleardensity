@@ -17,5 +17,7 @@ omegas.dat
 wfns_pruned.dat
 #For Harmonic density 1, otherwise *Anh*armonic
 0
+#Printing MC cartesian steps? (1=yes, other no)
+1
 
 

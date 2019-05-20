@@ -5,8 +5,9 @@
       use input_def
       use manage_cubes
 
-
       implicit none
+
+      include "mpif.h"
 
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: q_eq, sigma_gaus 
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: qq, xx 
@@ -25,29 +26,52 @@
       integer :: idum
       real*8  :: ran2
       real*8  :: xrand1,xrand2,y1,y2
-      real    :: start, finish
+
+      !MPI variables
+      INTEGER :: my_rank, num_procs, err_mpi
+      REAL*8  :: t_start, t_end
+
+      CHARACTER(len=4) :: str1
+      CHARACTER(len=10) :: str
+      CHARACTER(len=20) :: filename
+
+      INTEGER :: density_elem, reminder, Nsteps_MC_tot
+      REAL*8  :: tot_int_red, tot_int_sq_red
+      REAL*8, ALLOCATABLE, DIMENSION(:)       :: q_expect_value_red, q_expect_value_h_red
+      REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:) :: density_red, density_sq_red
+      
+
+      CALL MPI_INIT(err_mpi)
+      CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_rank, err_mpi)
+      CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, err_mpi)
+      t_start = MPI_WTIME()
       !
-      idum = -200
+      idum = -200 + my_rank
       !
       !
-      call cpu_time(start)
-      print*, 'Entering program:  NUclear DEnsity:'
-      print*, '  '
-      print*, '  '
+      IF (my_rank == 0) THEN
+         print*, 'Entering program:  NUclear DEnsity:'
+         print*, '  '
+         print*, '  '
+      END IF
       !
       !
-      print*, 'setting parameters from input files'
+      IF (my_rank == 0) print*, 'setting parameters from input files'
       call get_input_params
-      print*,'done'
-      print*, '  '
-      print*, '  '
+      IF (my_rank == 0) THEN
+         print*,'done'
+         print*, '  '
+         print*, '  '
+      END IF
       !
       !
-      print*, 'setting grid and parameters for cube files'
+      IF (my_rank == 0) print*, 'setting grid and parameters for cube files'
       call set_cube
-      print*,'done'
-      print*, '  '
-      print*, '  '
+      IF (my_rank == 0) THEN
+         print*,'done'
+         print*, '  '
+         print*, '  '
+      END IF
       !
       !  
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -64,8 +88,13 @@
       density = 0.d0
       allocate(density_sq(nxpoints, nypoints, nzpoints, nat))
       density_sq = 0.d0
+      allocate(density_red(nxpoints, nypoints, nzpoints, nat))
+      density_red = 0.d0
+      allocate(density_sq_red(nxpoints, nypoints, nzpoints, nat))
+      density_sq_red = 0.d0
       allocate(density_errorbar(nxpoints, nypoints, nzpoints, nat))
       density_errorbar = 0.d0
+      density_elem = nxpoints*nypoints*nzpoints*nat
       !
       ! Set multivariate gaussian width vector 
       ! for husimi distribution
@@ -82,6 +111,10 @@
       q_expect_value = 0.d0  
       allocate(q_expect_value_h(ncart))
       q_expect_value_h = 0.d0  
+      allocate(q_expect_value_red(ncart)) 
+      q_expect_value_red = 0.d0  
+      allocate(q_expect_value_h_red(ncart))
+      q_expect_value_h_red = 0.d0  
       !
       ! allocate corresponding structure in cartesian coordinates
       allocate(xx(ncart))
@@ -89,16 +122,31 @@
       allocate(x_expect_value_h(ncart))
       !
       ! open unit for fil with MC traj in xyz
-      open(unit_trajMC, file='traj.xyz')
+      IF (switch_print_mctraj == 1) THEN
+         str1='traj'
+         WRITE (str, '(I10)') my_rank
+         filename = str1 // TRIM(ADJUSTL(str)) //'.xyz'
+         open(unit_trajMC+my_rank, file=filename)
+      END IF
       !
+      !WORK DIVISION AMONG THREADS:
+      !Each rank nkows how many MC steps has to do
+      Nsteps_MC_tot = Nsteps_MC
+      reminder = MOD(Nsteps_MC, num_procs)
+      Nsteps_MC = (Nsteps_MC - reminder) / num_procs
+      IF (my_rank == 0) Nsteps_MC = Nsteps_MC + reminder
+      WRITE(*,*) 'I am rank ', my_rank, ' and I will do ', Nsteps_MC, ' steps.' 
+
       ! MC SAMPLING CYCLE
       tot_int=0.d0
       tot_int_sq=0.d0
       DO istep=1,Nsteps_MC
 
-          IF ( MOD(istep,1000)==0 ) THEN
-             WRITE(*,*) istep, ' steps of ', Nsteps_MC, ' done!' 
-          END IF
+          !TODO: valutare se far stamapare questo a ogni thread
+          !IF ( MOD(istep,1000)==0 ) THEN
+          !   WRITE(*,*) istep, ' steps of ', Nsteps_MC, ' done!' 
+          !END IF
+
           !
           ! Generate molecular structure in normal coordinates:
           do i = 1, nvib
@@ -122,12 +170,12 @@
           call to_cartesian(xx,qq)
           !
 	  ! Print out structure in xyz format on file
-          IF (Nsteps_MC <= 100000) THEN
+          IF (Nsteps_MC <= 100000 .and. switch_print_mctraj==1) THEN
            
-	  write(unit_trajMC,* ) nat
-	  write(unit_trajMC,* ) 
+	  write(unit_trajMC+my_rank,* ) nat
+	  write(unit_trajMC+my_rank,* ) 
 	  do i = 1, nat
-	      write(unit_trajMC,* ) symb_list(i), xx(3*i-2:3*i) * FROMauTOang
+	      write(unit_trajMC+my_rank,* ) symb_list(i), xx(3*i-2:3*i) * FROMauTOang
 	  enddo
 
           END IF
@@ -155,116 +203,138 @@
           !
           !
       ENDDO
+
+
+      !MPI reduce
+      CALL MPI_REDUCE(tot_int, tot_int_red, 1, MPI_DOUBLE_PRECISION,&
+                      MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
+      CALL MPI_REDUCE(tot_int_sq, tot_int_sq_red, 1, MPI_DOUBLE_PRECISION,&
+                      MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
+      CALL MPI_REDUCE(density, density_red, density_elem, MPI_DOUBLE_PRECISION,&
+                      MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
+      CALL MPI_REDUCE(density_sq, density_sq_red, density_elem, MPI_DOUBLE_PRECISION,&
+                      MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
+      CALL MPI_REDUCE(q_expect_value, q_expect_value_red, ncart, MPI_DOUBLE_PRECISION,&
+                      MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
+      CALL MPI_REDUCE(q_expect_value_h, q_expect_value_h_red, ncart, MPI_DOUBLE_PRECISION,&
+                      MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
       !
       ! close unit for fil with MC traj in xyz
-      close(unit_trajMC)
+      close(unit_trajMC+my_rank)
 
-      !
-      ! Normalize integral for expectation structures:
-      q_expect_value   = q_expect_value   /tot_int
-      q_expect_value_h = q_expect_value_h /Nsteps_MC
-      !
-      q_expect_value(4:9) = q_eq(4:9)
-      q_expect_value_h(4:9) = q_eq(4:9)
-      print*, 'q_eq    = ', q_eq
-      print*, 'q_exp_h = ', q_expect_value_h
-      print*, 'q_exp   = ', q_expect_value
+      IF (my_rank == 0) THEN
 
-      ! Bring back structures in cartesian coordinates
-      call to_cartesian(x_expect_value,  q_expect_value)
-      call to_cartesian(x_expect_value_h,q_expect_value_h)
-      !
-      ! Print out structures in xyz format on file
-      open(unit_geo_exp,   file='expectation.xyz')
-      open(unit_geo_exp_h, file='expectation_H.xyz')
-      !
-      write(unit_geo_exp,* ) nat
-      write(unit_geo_exp,* ) 
-      write(unit_geo_exp_h,* ) nat
-      write(unit_geo_exp_h,* ) 
-      do i = 1, nat
-          write(unit_geo_exp,* )   symb_list(i), x_expect_value(3*i-2:3*i)   * FROMauTOang
-          write(unit_geo_exp_h,* ) symb_list(i), x_expect_value_h(3*i-2:3*i) * FROMauTOang
-      enddo
-      !
-      close(unit_geo_exp)
-      close(unit_geo_exp_h)
-      !
-      !
-      !
-      ! Normalize density:
-      print*, 'total integ: ', tot_int / Nsteps_MC
-      !
-      det_omega = 1.d0
-      do i = 1, nvib
-         det_omega = det_omega * omega_vh(i)
-      enddo
-      !
-      norm_gaussian_normal = DSQRT( (2*pi)**nvib * 0.5d0 / det_omega )
+         !
+         ! Normalize integral for expectation structures:
+         q_expect_value_red   = q_expect_value_red / tot_int_red
+         q_expect_value_h_red = q_expect_value_h_red / Nsteps_MC_tot
+         !
+         q_expect_value_red(4:9) = q_eq(4:9)
+         q_expect_value_h_red(4:9) = q_eq(4:9)
+         !print*, 'q_eq    = ', q_eq
+         !print*, 'q_exp_h = ', q_expect_value_h_red
+         !print*, 'q_exp   = ', q_expect_value_red
 
-      !print*, 'norm gauss',  norm_gaussian_normal
-      !
-      !density = density / Nsteps_MC
-      !CHIARA: density della riga sopra diviso per total integ 
-      density = density / Nsteps_MC  
-      !density = density / tot_int 
-      !!!!density_sq = density_sq / tot_int_sq
-      density_sq = density_sq / Nsteps_MC
-      density_errorbar = SQRT( (density_sq - density**2) / Nsteps_MC )   
-        
-      !density = density * (norm_gaussian_normal / Nsteps_MC)
-      !
-      !
-      !
-      ! Print out nuclear densities on output files **SPOSTATO SOTTO**
-      !print*, 'printing cube files'
-      !call print_cube(density)
-      
-      !Check the normalization of each nucleus density
-      ALLOCATE(norm(nat))
-      norm = 0.d0
-      DO ii=1, nat
-         DO i=1, nxpoints
-            DO j=1, nypoints
-               DO k=1, nxpoints
-                  norm(ii) = norm(ii) + density(i,j,k,ii)
+         ! Bring back structures in cartesian coordinates
+         call to_cartesian(x_expect_value,  q_expect_value_red)
+         call to_cartesian(x_expect_value_h ,q_expect_value_h_red)
+         !
+         ! Print out structures in xyz format on file
+         open(unit_geo_exp,   file='expectation.xyz')
+         open(unit_geo_exp_h, file='expectation_H.xyz')
+         !
+         write(unit_geo_exp,* ) nat
+         write(unit_geo_exp,* ) 
+         write(unit_geo_exp_h,* ) nat
+         write(unit_geo_exp_h,* ) 
+         do i = 1, nat
+             write(unit_geo_exp,* )   symb_list(i), x_expect_value(3*i-2:3*i)   * FROMauTOang
+             write(unit_geo_exp_h,* ) symb_list(i), x_expect_value_h(3*i-2:3*i) * FROMauTOang
+         enddo
+         !
+         close(unit_geo_exp)
+         close(unit_geo_exp_h)
+         !
+         !
+         !
+         ! Normalize density:
+         print*, 'total integ: ', tot_int_red / Nsteps_MC_tot
+         !
+         det_omega = 1.d0
+         do i = 1, nvib
+            det_omega = det_omega * omega_vh(i)
+         enddo
+         !
+         norm_gaussian_normal = DSQRT( (2*pi)**nvib * 0.5d0 / det_omega )
+
+         !print*, 'norm gauss',  norm_gaussian_normal
+         !
+         !density = density / Nsteps_MC
+         !CHIARA: density della riga sopra diviso per total integ 
+         density_red = density_red / Nsteps_MC_tot  
+         !density = density / tot_int 
+         !!!!density_sq = density_sq / tot_int_sq
+         density_sq_red = density_sq_red / Nsteps_MC_tot
+         density_errorbar = SQRT( (density_sq_red - density_red**2) / Nsteps_MC_tot )   
+           
+         !density = density * (norm_gaussian_normal / Nsteps_MC)
+         !
+         !
+         !
+         ! Print out nuclear densities on output files **SPOSTATO SOTTO**
+         !print*, 'printing cube files'
+         !call print_cube(density)
+         
+         !Check the normalization of each nucleus density
+         ALLOCATE(norm(nat))
+         norm = 0.d0
+         DO ii=1, nat
+            DO i=1, nxpoints
+               DO j=1, nypoints
+                  DO k=1, nxpoints
+                     norm(ii) = norm(ii) + density_red(i,j,k,ii)
+                  END DO
                END DO
-            END DO
-          END DO
-          print*, ii, ' nucleus norm: ', norm(ii) 
-      END DO
-      !
-      !
-      !
-      !Normalize by the voxel dimension
-      density = density / (dx*dy*dz) 
-      !
-      !
-      !
-      ! Print out nuclear densities on output files
-      print*, 'printing cube files'
-      call print_cube(density)
-      !
-      !
-      !
-      print*, 'printing cube files with density error bar'
-      call print_cube_errorbar(density_errorbar)
-      !
-      !
-      !
-      print*,'done'
-      print*, '  '
-      print*, '  '
-      !
-      !
-      !
-      call cpu_time(finish)
-      print '("Time for execution = ",f6.3," seconds.")',finish-start
-      print*, '  '
-      !
-      !
-      print*, 'ciao'
-
+             END DO
+             print*, ii, ' nucleus norm: ', norm(ii) 
+         END DO
+         !
+         !
+         !
+         !Normalize by the voxel dimension
+         density_red = density_red / (dx*dy*dz) 
+         !
+         !
+         !
+         ! Print out nuclear densities on output files
+         print*, 'printing cube files'
+         call print_cube(density_red)
+         !
+         !
+         !
+         print*, 'printing cube files with density error bar'
+         call print_cube_errorbar(density_errorbar)
+         !
+         !
+         !
+         print*,'done'
+         print*, '  '
+         print*, '  '
+         !
+         !
+         !
+         ! call cpu_time(finish)
+         t_end = MPI_WTIME()
+         print '("Time for execution = ",f10.3," seconds.")', t_end-t_start
+         print*, '  '
+         !
+         !
+         print*, 'ciao'
+ 
+      END IF
+       
+      call MPI_FINALIZE(err_mpi)
+      
 
 
    END PROGRAM NUDE

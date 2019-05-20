@@ -1,5 +1,8 @@
-fc=gfortran
-myflgs = -fno-automatic -fcheck=bounds -W -O3
+#fc=gfortran
+fc=mpif90
+myflgs = -O3
+#myflgs = -fcheck=bounds -O0
+#myflgs = -fno-automatic -fcheck=bounds -O3
 # before compiling, please export LAPACK_LIB=path_of_lapack and export BLAS_LIB=path_of_blas
 #lib = -L$(LAPACK_LIB) -llapack -L$(BLAS_LIB) -lblas  
 lib = 
@@ -16,7 +19,7 @@ obj =   \
 all: compila
 
 compila: $(obj)  
-	$(fc) $(myflgs) $(obj) -o nude.exe $(lib)
+	$(fc) $(myflgs) $(obj) -o nude_par.exe $(lib)
 
 %.o : %.f
 	$(fc) $(myflgs) -c $< 
