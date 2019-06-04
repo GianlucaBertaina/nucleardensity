@@ -19,7 +19,7 @@
       integer :: nxpoints, nypoints, nzpoints
       integer :: switch_harm, switch_print_mctraj
       character (len=80) :: file_geo, file_cnorm
-      character (len=80) :: file_wfn, file_omega
+      character (len=80) :: file_wfn, file_omega,file_bonds_input
       !
 !!!!!! from file with eq geometry frame !!!!      
       !
@@ -39,6 +39,12 @@
       !
       integer, allocatable, dimension(:,:) :: h_vec
       real*8, allocatable, dimension(:)   :: coef 
+      !
+!!!!!! Settings for bonds
+      integer              :: nbonds
+      integer, allocatable :: bond_pair(:,:)
+!!!!!! Options
+      logical   :: do_bonds=.false.
       !
       contains
 
@@ -67,6 +73,8 @@
       !
       !print*, '    getting vibrational wavefunction:' 
       call get_wfn
+      !
+      if (do_bonds) call get_bonds()
       !
       !
       end subroutine get_input_params
@@ -120,6 +128,8 @@
       read(unit_input,*) switch_harm! Harmonic 1 / Hanaramonic /=1 
       read(unit_input,*) ! Here a comment line
       read(unit_input,*) switch_print_mctraj! Print Mc traj 1 / Don't print /=1 
+      read(unit_input,*) ! Here a comment line
+      read(unit_input,*) file_bonds_input ! file with bonds settings
       !
       close(unit_input)
 
@@ -174,6 +184,17 @@
       if (.not.file_exists) then
         print*, "Missing file with wavefunction. Stopping program"
 	STOP
+      endif
+      !
+      if (trim(file_bonds_input)=="0") then
+        do_bonds=.false.
+      else
+        do_bonds=.true.
+        inquire(file=trim(file_bonds_input), exist=file_exists)
+        if (.not.file_exists) then
+         print*, "Missing file with bond definitions. Stopping program"
+         STOP
+        endif
       endif
       !
       !

@@ -242,3 +242,16 @@
 
 
    END MODULE manage_cubes
+
+
+
+
+   MODULE manage_bonds
+   implicit none
+   save
+
+   REAL*8  :: cubelmax, dx, dy, dz
+
+   contains
+
+   END MODULE manage_bonds
