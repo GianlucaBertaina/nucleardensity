@@ -255,11 +255,6 @@
          close(unit_geo_exp)
          close(unit_geo_exp_h)
          !
-         !
-         !
-         ! Normalize density:
-         print*, 'total integ: ', tot_int_red / Nsteps_MC_tot
-         !
          det_omega = 1.d0
          do i = 1, nvib
             det_omega = det_omega * omega_vh(i)
@@ -267,19 +262,20 @@
          !
          norm_gaussian_normal = DSQRT( (2*pi)**nvib * 0.5d0 / det_omega )
 
-         !print*, 'norm gauss',  norm_gaussian_normal
+         ! Normalize density:
+         print*, 'total integ, Nsteps, Gauss norm: ', tot_int_red , Nsteps_MC_tot ,norm_gaussian_normal
+
          !
-         !density = density / Nsteps_MC
          !CHIARA: density della riga sopra diviso per total integ 
-         density_red = density_red / Nsteps_MC_tot  
-         !density = density / tot_int 
-         !!!!density_sq = density_sq / tot_int_sq
-         density_sq_red = density_sq_red / Nsteps_MC_tot
+         !density_red = density_red / Nsteps_MC_tot
+         !density_sq_red = density_sq_red / Nsteps_MC_tot
+
+         density_red = density_red / tot_int_red
+         density_sq_red = density_sq_red / tot_int_red
+
          density_errorbar = SQRT( (density_sq_red - density_red**2) / Nsteps_MC_tot )   
            
          !density = density * (norm_gaussian_normal / Nsteps_MC)
-         !
-         !
          !
          ! Print out nuclear densities on output files **SPOSTATO SOTTO**
          !print*, 'printing cube files'
@@ -287,50 +283,31 @@
          
          !Check the normalization of each nucleus density
          ALLOCATE(norm(nat))
-         norm = 0.d0
          DO ii=1, nat
-            DO i=1, nxpoints
-               DO j=1, nypoints
-                  DO k=1, nxpoints
-                     norm(ii) = norm(ii) + density_red(i,j,k,ii)
-                  END DO
-               END DO
-             END DO
-             print*, ii, ' nucleus norm: ', norm(ii) 
+             norm(ii) = sum(density_red(:,:,:,ii))
+             print*, ii, ' unnormalized nucleus norm: ', norm(ii)
          END DO
-         !
-         !
          !
          !Normalize by the voxel dimension
          density_red = density_red / (dx*dy*dz) 
-         !
-         !
+         density_errorbar = density_errorbar / (dx*dy*dz)
          !
          ! Print out nuclear densities on output files
          print*, 'printing cube files'
          call print_cube(density_red)
          !
-         !
-         !
          print*, 'printing cube files with density error bar'
          call print_cube_errorbar(density_errorbar)
-         !
-         !
          !
          print*,'done'
          print*, '  '
          print*, '  '
-         !
-         !
          !
          ! call cpu_time(finish)
          t_end = MPI_WTIME()
          print '("Time for execution = ",f10.3," seconds.")', t_end-t_start
          print*, '  '
          !
-         !
-         print*, 'ciao'
- 
       END IF
        
       call MPI_FINALIZE(err_mpi)

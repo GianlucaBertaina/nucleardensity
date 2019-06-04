@@ -11,7 +11,7 @@ obj =   \
 	constants_mod.o\
 	io_units_def_mod.o\
 	input_defs_mod.o\
-        manage_cubes.o\
+	manage_cubes.o\
 	hermite.o\
 	calc_wfn.o\
 	nude.o
