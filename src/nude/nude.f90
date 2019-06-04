@@ -86,14 +86,14 @@
       ! Initialize density (a 3D array for each atom)
       allocate(density(nxpoints, nypoints, nzpoints, nat))
       density = 0.d0
-      allocate(density_sq(nxpoints, nypoints, nzpoints, nat))
-      density_sq = 0.d0
+!      allocate(density_sq(nxpoints, nypoints, nzpoints, nat))
+!      density_sq = 0.d0
       allocate(density_red(nxpoints, nypoints, nzpoints, nat))
       density_red = 0.d0
-      allocate(density_sq_red(nxpoints, nypoints, nzpoints, nat))
-      density_sq_red = 0.d0
-      allocate(density_errorbar(nxpoints, nypoints, nzpoints, nat))
-      density_errorbar = 0.d0
+!      allocate(density_sq_red(nxpoints, nypoints, nzpoints, nat))
+!      density_sq_red = 0.d0
+!      allocate(density_errorbar(nxpoints, nypoints, nzpoints, nat))
+!      density_errorbar = 0.d0
       density_elem = nxpoints*nypoints*nzpoints*nat
       !
       ! Set multivariate gaussian width vector 
@@ -197,7 +197,7 @@
 	      !
 	      ! Update density
 	      density(ix,iy,iz,i) = density(ix,iy,iz,i) + bar_wfn_sq 
-	      density_sq(ix,iy,iz,i) = density_sq(ix,iy,iz,i) + bar_wfn_sq**2
+!	      density_sq(ix,iy,iz,i) = density_sq(ix,iy,iz,i) + bar_wfn_sq**2
 	      !
 	  enddo
           !
@@ -212,8 +212,8 @@
                       MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
       CALL MPI_REDUCE(density, density_red, density_elem, MPI_DOUBLE_PRECISION,&
                       MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
-      CALL MPI_REDUCE(density_sq, density_sq_red, density_elem, MPI_DOUBLE_PRECISION,&
-                      MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
+!      CALL MPI_REDUCE(density_sq, density_sq_red, density_elem, MPI_DOUBLE_PRECISION,&
+!                      MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
       CALL MPI_REDUCE(q_expect_value, q_expect_value_red, ncart, MPI_DOUBLE_PRECISION,&
                       MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
       CALL MPI_REDUCE(q_expect_value_h, q_expect_value_h_red, ncart, MPI_DOUBLE_PRECISION,&
@@ -271,9 +271,9 @@
          !density_sq_red = density_sq_red / Nsteps_MC_tot
 
          density_red = density_red / tot_int_red
-         density_sq_red = density_sq_red / tot_int_red
+!         density_sq_red = density_sq_red / tot_int_red
 
-         density_errorbar = SQRT( (density_sq_red - density_red**2) / Nsteps_MC_tot )   
+!         density_errorbar = SQRT( (density_sq_red - density_red**2) / Nsteps_MC_tot )
            
          !density = density * (norm_gaussian_normal / Nsteps_MC)
          !
@@ -290,14 +290,14 @@
          !
          !Normalize by the voxel dimension
          density_red = density_red / (dx*dy*dz) 
-         density_errorbar = density_errorbar / (dx*dy*dz)
+!         density_errorbar = density_errorbar / (dx*dy*dz)
          !
          ! Print out nuclear densities on output files
          print*, 'printing cube files'
          call print_cube(density_red)
          !
-         print*, 'printing cube files with density error bar'
-         call print_cube_errorbar(density_errorbar)
+!         print*, 'printing cube files with density error bar'
+!         call print_cube_errorbar(density_errorbar)
          !
          print*,'done'
          print*, '  '
