@@ -41,8 +41,9 @@
       real*8, allocatable, dimension(:)   :: coef 
       !
 !!!!!! Settings for bonds
-      integer              :: nbonds
+      integer              :: nbonds,bondnrpoints
       integer, allocatable :: bond_pair(:,:)
+      character(len=20),allocatable :: bond_name(:)
 !!!!!! Options
       logical   :: do_bonds=.false.
       !
@@ -385,7 +386,28 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
 
+  subroutine get_bonds()
+    use io_units_def,    only : unit_bonds_in
+    implicit none
+    integer :: b
+    open(unit_bonds_in,file=trim(file_bonds_input),status='old', action="read")
+    read(unit_bonds_in,*) ! Info
+    read(unit_bonds_in,*) bondnrpoints
+    read(unit_bonds_in,*) ! Info
+    read(unit_bonds_in,*) nbonds
+    allocate(bond_pair(1:2,1:nbonds))
+    allocate(bond_name(1:nbonds))
 
+    do b=1,nbonds
+      read(unit_bonds_in,*) ! Info
+      read(unit_bonds_in,*) bond_name(b)
+      read(unit_bonds_in,*) ! Info
+      read(unit_bonds_in,*) bond_pair(1:2,b)
+    enddo
+
+    close(unit_bonds_in)
+
+  end subroutine
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  

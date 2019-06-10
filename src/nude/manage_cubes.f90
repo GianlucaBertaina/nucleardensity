@@ -238,20 +238,87 @@
 
    END SUBROUTINE print_cube_errorbar
 
-
-
-
    END MODULE manage_cubes
 
 
-
-
    MODULE manage_bonds
-   implicit none
-   save
 
-   REAL*8  :: cubelmax, dx, dy, dz
+     use input_def, only : x_eq_cart, nat, bondnrpoints, nbonds,bond_pair,bond_name
+     implicit none
+     save
+
+     REAL*8,ALLOCATABLE  :: bondlmax(:), bonddr(:)
 
    contains
+
+   SUBROUTINE set_bonds
+        implicit none
+
+        REAL*8 :: maxdist
+        REAL*8 :: dist
+
+        INTEGER :: i,j,b
+        REAL*8, PARAMETER :: maxdist_plus=4.d0
+
+        ALLOCATE(bondlmax(nbonds), bonddr(nbonds))
+
+!       Compute distances
+        DO b=1, nbonds
+
+          i = bond_pair(1,b)
+          j = bond_pair(2,b)
+
+          dist = SQRT( (x_eq_cart(3*i - 2)-x_eq_cart(3*j - 2))**2 +&
+                       (x_eq_cart(3*i - 1)-x_eq_cart(3*j - 1))**2 +&
+                       (x_eq_cart(3*i    )-x_eq_cart(3*j    ))**2  )
+
+          bondlmax(b) = dist + maxdist_plus
+          bonddr(b)   = bondlmax(b) / bondnrpoints
+        END DO
+
+   END SUBROUTINE set_bonds
+
+
+   SUBROUTINE find_bond_index(Ri, ir, b)
+        implicit none
+
+        INTEGER, INTENT(OUT) :: ir
+        REAL*8, INTENT(IN) :: Ri,b
+
+           ir = 1+INT(Ri / bonddr(b))
+           IF (ir > bondnrpoints) ir = bondnrpoints
+
+   END SUBROUTINE
+
+
+   SUBROUTINE print_bonds(density,density_err)
+        use io_units_def
+        use constants
+
+        implicit none
+
+        REAL*8, intent(in) :: density(bondnrpoints, nbonds)
+        REAL*8, intent(in) :: density_err(bondnrpoints, nbonds)
+        character(25) :: filename
+        integer :: i, j, k, b
+
+      DO b=1, nbonds
+
+        !Preparing filename string
+        WRITE(filename, "('bond_',1A,'.cube')") trim(bond_name(b))
+
+        !associate a unit to the cube file
+        OPEN (UNIT=unit_bonds_out+b, FILE=trim(filename), STATUS='replace')
+
+        ! write out cube file introduction
+        WRITE(unit_bonds_out+b,*) "!Histogram density of bond. Values at the center of intervals"
+
+        WRITE(unit_bonds_out+b,"(3(1ES22.15,1x))") (bonddr(b)*(i-0.5d0),density(i,b),density_err(i,b), i=1,bondnrpoints)
+
+        CLOSE(unit_bonds_out+b)
+
+      END DO
+
+   END SUBROUTINE print_bonds
 
    END MODULE manage_bonds

@@ -13,7 +13,8 @@
        integer,   parameter   :: unit_cube             = 37
        integer,   parameter   :: unit_geo_exp          = 38
        integer,   parameter   :: unit_geo_exp_h        = 39 
-       integer,   parameter   :: unit_bonds            = 10000
+       integer,   parameter   :: unit_bonds_in         = 10000
+       integer,   parameter   :: unit_bonds_out        = 10001
 
 
       END MODULE io_units_def

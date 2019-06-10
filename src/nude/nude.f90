@@ -4,6 +4,7 @@
       use io_units_def
       use input_def
       use manage_cubes
+      use manage_bonds
 
       implicit none
 
@@ -67,6 +68,10 @@
       !
       IF (my_rank == 0) print*, 'setting grid and parameters for cube files'
       call set_cube
+      !
+      IF (my_rank == 0) print*, "setting bonds"
+      if (do_bonds) call set_bonds
+      !
       IF (my_rank == 0) THEN
          print*,'done'
          print*, '  '
