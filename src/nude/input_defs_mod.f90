@@ -98,7 +98,7 @@
       inquire(file=trim(inputfile), exist=file_exists)
       if (.not.file_exists) then
         print*, "Missing input file. Stopping program."
-	STOP
+  STOP
       endif
 
 
@@ -139,21 +139,21 @@
 
 !!    Check that the number of grid points in all directions is even
       !if (                            &
-	!  (mod(nxpoints,2) /= 0) .OR. &
+  !  (mod(nxpoints,2) /= 0) .OR. &
         !  (mod(nypoints,2) /= 0) .OR. &
         !  (mod(nzpoints,2) /= 0)      & 
-	!  ) then
+  !  ) then
         !print*, "number of grid points must be even!"
-	!STOP
+  !STOP
       !endif
 
       if (                            &
-	  (mod(nxpoints,2) == 0) .OR. &
+    (mod(nxpoints,2) == 0) .OR. &
           (mod(nypoints,2) == 0) .OR. &
           (mod(nzpoints,2) == 0)      & 
-	  ) then
+    ) then
         print*, "number of grid points must be odd!"
-	STOP
+  STOP
       end if
       !
       !
@@ -164,27 +164,27 @@
       if (.not.file_exists) then
         print*, "Missing file with molecular geometry at equilibrium."
         print*,  "Stopping program"
-	STOP
+  STOP
       endif
       !
       inquire(file=trim(file_cnorm), exist=file_exists)
       if (.not.file_exists) then
         print*, "Missing file with cnorm matrix. Stopping program"
-	STOP
+  STOP
       endif
       !
       inquire(file=trim(file_omega), exist=file_exists)
       if (.not.file_exists) then
         print*, "Missing file with harmonic frequencies." 
         print*, "Stopping program"
-	STOP
+  STOP
       endif
       !
       !
       inquire(file=trim(file_wfn), exist=file_exists)
       if (.not.file_exists) then
         print*, "Missing file with wavefunction. Stopping program"
-	STOP
+  STOP
       endif
       !
       if (trim(file_bonds_input)=="0") then
@@ -238,22 +238,22 @@
 
           case ('H')
                amass(i) = 1837.15d0
-	       Z_nuclei(i) = 1
+         Z_nuclei(i) = 1
           case ('D')  !Deuterium
                amass(i) = 3671.48d0
-	       Z_nuclei(i) = 1
+         Z_nuclei(i) = 1
           case ('O')
                amass(i) = 29156.96d0
-	       Z_nuclei(i) = 8
+         Z_nuclei(i) = 8
           case ('C')
                amass(i) = 21874.66d0
-	       Z_nuclei(i) = 6
+         Z_nuclei(i) = 6
           case ('N')
                amass(i) = 25526.06d0
-	       Z_nuclei(i) = 7
+         Z_nuclei(i) = 7
           case ('Ti')
                amass(i) = 87256.20d0
-	       Z_nuclei(i) = 22
+         Z_nuclei(i) = 22
           case default
                write(*,*) 'One or more atoms in your molecule is not', &
                           ' present in our database'
@@ -304,7 +304,7 @@
       !
       read(unit_omega,*) ! A comment line
       do i = 1, nvib
-	  read(unit_omega,*) omega_vh(i)
+    read(unit_omega,*) omega_vh(i)
       enddo
       !
       omega_vh = omega_vh * FROMcmTOau

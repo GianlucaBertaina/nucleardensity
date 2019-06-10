@@ -163,7 +163,7 @@
           !
           ! Compute wfn^2/Gaussian at point qq  
           IF (switch_harm /= 1) THEN
-	     call bar_wfn_squared(qq-q_eq,bar_wfn_sq)
+       call bar_wfn_squared(qq-q_eq,bar_wfn_sq)
           ELSE
              bar_wfn_sq = 1.d0
           END IF
@@ -171,40 +171,40 @@
           tot_int = tot_int + bar_wfn_sq
           tot_int_sq = tot_int_sq + bar_wfn_sq**2
           !
-	  ! Bring back structure in cartesian coordinates
+    ! Bring back structure in cartesian coordinates
           call to_cartesian(xx,qq)
           !
-	  ! Print out structure in xyz format on file
+    ! Print out structure in xyz format on file
           IF (Nsteps_MC <= 100000 .and. switch_print_mctraj==1) THEN
            
-	  write(unit_trajMC+my_rank,* ) nat
-	  write(unit_trajMC+my_rank,* ) 
-	  do i = 1, nat
-	      write(unit_trajMC+my_rank,* ) symb_list(i), xx(3*i-2:3*i) * FROMauTOang
-	  enddo
+    write(unit_trajMC+my_rank,* ) nat
+    write(unit_trajMC+my_rank,* ) 
+    do i = 1, nat
+        write(unit_trajMC+my_rank,* ) symb_list(i), xx(3*i-2:3*i) * FROMauTOang
+    enddo
 
           END IF
           !
           !
           ! Update value for expectation postition 
-	  q_expect_value   = q_expect_value   + qq * bar_wfn_sq
-	  q_expect_value_h = q_expect_value_h + qq
-	  !
-	  !
+    q_expect_value   = q_expect_value   + qq * bar_wfn_sq
+    q_expect_value_h = q_expect_value_h + qq
+    !
+    !
           ! Update corresponding densities
-	  do i = 1,nat
-	      !
-	      ! coordinates in au of i^th atom
-	      Ri(:) = xx(3*i-2:3*i)
-	      !
-	      ! Corresponding grid cube indexes
-	      call find_cube_index(Ri,ix,iy,iz)
-	      !
-	      ! Update density
-	      density(ix,iy,iz,i) = density(ix,iy,iz,i) + bar_wfn_sq 
-!	      density_sq(ix,iy,iz,i) = density_sq(ix,iy,iz,i) + bar_wfn_sq**2
-	      !
-	  enddo
+    do i = 1,nat
+        !
+        ! coordinates in au of i^th atom
+        Ri(:) = xx(3*i-2:3*i)
+        !
+        ! Corresponding grid cube indexes
+        call find_cube_index(Ri,ix,iy,iz)
+        !
+        ! Update density
+        density(ix,iy,iz,i) = density(ix,iy,iz,i) + bar_wfn_sq 
+!        density_sq(ix,iy,iz,i) = density_sq(ix,iy,iz,i) + bar_wfn_sq**2
+        !
+    enddo
           !
           !
       ENDDO

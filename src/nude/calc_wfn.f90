@@ -15,7 +15,7 @@
       wfn_b2 = 0.d0
 
       do k = 1, dim_K
-	  call harm_wfn_bar(dq,h_vec(:,k),psi)
+    call harm_wfn_bar(dq,h_vec(:,k),psi)
           wfn_b2 = wfn_b2 + coef(k) * psi
       enddo
 
@@ -50,7 +50,7 @@
       do i = 1, nvib
           zz = dq(i) * dsqrt(omega_vh(i))
           norm = 1.d0 ! hermite pols already normalized in routine
-	  call hn_polynomial_value ( vec(i), zz, pol)
+    call hn_polynomial_value ( vec(i), zz, pol)
           fharm = pol !* EXP(-zz**2/2.d0)
           wfn = wfn * fharm * norm
       enddo

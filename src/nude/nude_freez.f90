@@ -95,37 +95,37 @@
           !
           ! Compute wfn^2/Gaussian at point qq  
           IF (switch_harm /= 1) THEN
-	     call bar_wfn_squared(qq-q_eq,bar_wfn_sq)
+       call bar_wfn_squared(qq-q_eq,bar_wfn_sq)
           ELSE
              bar_wfn_sq = 1.d0
           END IF
 
           tot_int = tot_int + bar_wfn_sq
           !
-	  ! Bring back structure in cartesian coordinates
+    ! Bring back structure in cartesian coordinates
           call to_cartesian(xx,qq)
           !
-	  ! Print out structure in xyz format on file
-	  write(unit_trajMC,* ) nat
-	  write(unit_trajMC,* ) 
-	  do i = 1, nat
-	      write(unit_trajMC,* ) symb_list(i), xx(3*i-2:3*i) * FROMauTOang
-	  enddo
+    ! Print out structure in xyz format on file
+    write(unit_trajMC,* ) nat
+    write(unit_trajMC,* ) 
+    do i = 1, nat
+        write(unit_trajMC,* ) symb_list(i), xx(3*i-2:3*i) * FROMauTOang
+    enddo
           !
           !
           ! Update corresponding densities
-	  do i = 1,nat
-	      !
-	      ! coordinates in au of i^th atom
-	      Ri(:) = xx(3*i-2:3*i)
-	      !
-	      ! Corresponding grid cube indexes
-	      call find_cube_index(Ri,ix,iy,iz)
-	      !
-	      ! Update density
-	      density(ix,iy,iz,i) = density(ix,iy,iz,i) + bar_wfn_sq 
-	      !
-	  enddo
+    do i = 1,nat
+        !
+        ! coordinates in au of i^th atom
+        Ri(:) = xx(3*i-2:3*i)
+        !
+        ! Corresponding grid cube indexes
+        call find_cube_index(Ri,ix,iy,iz)
+        !
+        ! Update density
+        density(ix,iy,iz,i) = density(ix,iy,iz,i) + bar_wfn_sq 
+        !
+    enddo
           !
           !
       ENDDO
@@ -139,7 +139,7 @@
       !
       det_omega = 1.d0
       do i = 1, nvib
-	 det_omega = det_omega * omega_vh(i)
+   det_omega = det_omega * omega_vh(i)
       enddo
       !
       norm_gaussian_normal = DSQRT( (2*pi)**nvib * 0.5d0 / det_omega )
