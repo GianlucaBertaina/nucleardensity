@@ -275,8 +275,8 @@
         q_expect_value_red   = q_expect_value_red   / tot_int_red
         q_expect_value_h_red = q_expect_value_h_red / Nsteps_MC_tot
         !
-        q_expect_value_red(4:9)   = q_eq(4:9)
-        q_expect_value_h_red(4:9) = q_eq(4:9)
+        q_expect_value_red(nvib+1:ncart)   = q_eq(nvib+1:ncart)
+        q_expect_value_h_red(nvib+1:ncart) = q_eq(nvib+1:ncart)
         !print*, 'q_eq    = ', q_eq
         !print*, 'q_exp_h = ', q_expect_value_h_red
         !print*, 'q_exp   = ', q_expect_value_red
@@ -290,9 +290,9 @@
         open(unit_geo_exp_h, file='expectation_H.xyz')
         !
         write(unit_geo_exp,* ) nat
-        write(unit_geo_exp,* )
+        write(unit_geo_exp,* ) "# Expectation value of geometry in the chosen wavefunction"
         write(unit_geo_exp_h,* ) nat
-        write(unit_geo_exp_h,* )
+        write(unit_geo_exp_h,* ) "# Expectation value of geometry in harmonic ground state"
         do i = 1, nat
           write(unit_geo_exp,* )   symb_list(i), x_expect_value(3*i-2:3*i)   * FROMauTOang
           write(unit_geo_exp_h,* ) symb_list(i), x_expect_value_h(3*i-2:3*i) * FROMauTOang
