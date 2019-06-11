@@ -41,12 +41,12 @@
       real*8, allocatable, dimension(:)   :: coef 
       !
 !!!!!! Settings for bonds
-      integer              :: nbonds,bondpoints  
-      integer, allocatable :: bond_pair(:,:)
+      integer                       :: nbonds,bondpoints
+      integer, allocatable          :: bond_pair(:,:)
       character(len=20),allocatable :: bond_name(:)
 !!!!!! Options
-      logical   :: do_bonds=.false.
-      logical   :: do_densities=.false.
+      logical                       :: do_bonds=.false.
+      logical                       :: do_densities=.false.
       !
       contains
 
@@ -85,20 +85,17 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
       subroutine read_input 
 
-
       implicit none
 
       character(30),parameter:: inputfile='input_nude.dat'
 
       logical :: file_exists=.true.
 
-
-
       !! check input file existence
       inquire(file=trim(inputfile), exist=file_exists)
       if (.not.file_exists) then
         print*, "Missing input file. Stopping program."
-  STOP
+        STOP
       endif
 
 
@@ -138,24 +135,11 @@
 
       !
       !
-
-!!    Check that the number of grid points in all directions is even
-      !if (                            &
-  !  (mod(nxpoints,2) /= 0) .OR. &
-        !  (mod(nypoints,2) /= 0) .OR. &
-        !  (mod(nzpoints,2) /= 0)      & 
-  !  ) then
-        !print*, "number of grid points must be even!"
-  !STOP
-      !endif
-
-      if (                            &
-    (mod(nxpoints,2) == 0) .OR. &
+      if ((mod(nxpoints,2) == 0) .OR. &
           (mod(nypoints,2) == 0) .OR. &
-          (mod(nzpoints,2) == 0)      & 
-    ) then
+          (mod(nzpoints,2) == 0)      ) then
         print*, "number of grid points must be odd!"
-  STOP
+        STOP
       end if
       !
       !
@@ -166,27 +150,27 @@
       if (.not.file_exists) then
         print*, "Missing file with molecular geometry at equilibrium."
         print*,  "Stopping program"
-  STOP
+        STOP
       endif
       !
       inquire(file=trim(file_cnorm), exist=file_exists)
       if (.not.file_exists) then
         print*, "Missing file with cnorm matrix. Stopping program"
-  STOP
+        STOP
       endif
       !
       inquire(file=trim(file_omega), exist=file_exists)
       if (.not.file_exists) then
         print*, "Missing file with harmonic frequencies." 
         print*, "Stopping program"
-  STOP
+        STOP
       endif
       !
       !
       inquire(file=trim(file_wfn), exist=file_exists)
       if (.not.file_exists) then
         print*, "Missing file with wavefunction. Stopping program"
-  STOP
+        STOP
       endif
       !
       if (trim(file_bonds_input)=="F") then
@@ -195,8 +179,8 @@
         do_bonds=.true.
         inquire(file=trim(file_bonds_input), exist=file_exists)
         if (.not.file_exists) then
-         print*, "Missing file with bond definitions. Stopping program"
-         STOP
+          print*, "Missing file with bond definitions. Stopping program"
+          STOP
         endif
       endif
       !
@@ -220,8 +204,6 @@
 
       character (len=2), dimension (nat), intent(out) :: symb_list
       real*8, dimension(ncart), intent(out) :: x_eq_cart, xm_sqrt
-      
-
 
       ! file with equilibrium geometry in xyz format:
       open(unit_eq_geo, file= file_geo, status='old', action="read") 
@@ -239,23 +221,23 @@
           select case (symb_list(i))
 
           case ('H')
-               amass(i) = 1837.15d0
-         Z_nuclei(i) = 1
+              amass(i) = 1837.15d0
+              Z_nuclei(i) = 1
           case ('D')  !Deuterium
-               amass(i) = 3671.48d0
-         Z_nuclei(i) = 1
+              amass(i) = 3671.48d0
+              Z_nuclei(i) = 1
           case ('O')
-               amass(i) = 29156.96d0
-         Z_nuclei(i) = 8
+              amass(i) = 29156.96d0
+              Z_nuclei(i) = 8
           case ('C')
-               amass(i) = 21874.66d0
-         Z_nuclei(i) = 6
+              amass(i) = 21874.66d0
+              Z_nuclei(i) = 6
           case ('N')
-               amass(i) = 25526.06d0
-         Z_nuclei(i) = 7
+              amass(i) = 25526.06d0
+              Z_nuclei(i) = 7
           case ('Ti')
-               amass(i) = 87256.20d0
-         Z_nuclei(i) = 22
+              amass(i) = 87256.20d0
+              Z_nuclei(i) = 22
           case default
                write(*,*) 'One or more atoms in your molecule is not', &
                           ' present in our database'
@@ -306,14 +288,12 @@
       !
       read(unit_omega,*) ! A comment line
       do i = 1, nvib
-    read(unit_omega,*) omega_vh(i)
+        read(unit_omega,*) omega_vh(i)
       enddo
       !
       omega_vh = omega_vh * FROMcmTOau
       !
       close(unit_omega)
-      
-
 
       end subroutine get_omega
 
@@ -388,32 +368,33 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
 
-  subroutine get_bonds()
-    use io_units_def,    only : unit_bonds_in
-    implicit none
-    integer :: b
-    open(unit_bonds_in,file=trim(file_bonds_input),status='old', action="read")
-    read(unit_bonds_in,*) ! Info
-    read(unit_bonds_in,*) bondpoints  
-    read(unit_bonds_in,*) ! Info
-    read(unit_bonds_in,*) nbonds
-    allocate(bond_pair(1:2,1:nbonds))
-    allocate(bond_name(1:nbonds))
+      subroutine get_bonds()
+        use io_units_def,    only : unit_bonds_in
+        implicit none
+        integer :: b
+        !
+        open(unit_bonds_in,file=trim(file_bonds_input),status='old', action="read")
+        read(unit_bonds_in,*) ! Info
+        read(unit_bonds_in,*) bondpoints
+        read(unit_bonds_in,*) ! Info
+        read(unit_bonds_in,*) nbonds
+        allocate(bond_pair(1:2,1:nbonds))
+        allocate(bond_name(1:nbonds))
 
-    do b=1,nbonds
-      read(unit_bonds_in,*) ! Info
-      read(unit_bonds_in,*) bond_name(b)
-      read(unit_bonds_in,*) ! Info
-      read(unit_bonds_in,*) bond_pair(1:2,b)
-    enddo
+        do b=1,nbonds
+          read(unit_bonds_in,*) ! Info
+          read(unit_bonds_in,*) bond_name(b)
+          read(unit_bonds_in,*) ! Info
+          read(unit_bonds_in,*) bond_pair(1:2,b)
+        enddo
 
-    close(unit_bonds_in)
+        close(unit_bonds_in)
 
-  end subroutine
+      end subroutine
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  
-      END MODULE input_def
+  END MODULE input_def
 
 
 
