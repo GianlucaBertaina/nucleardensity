@@ -41,7 +41,7 @@
       real*8, allocatable, dimension(:)   :: coef 
       !
 !!!!!! Settings for bonds
-      integer              :: nbonds,bondnrpoints
+      integer              :: nbonds,bondpoints  
       integer, allocatable :: bond_pair(:,:)
       character(len=20),allocatable :: bond_name(:)
 !!!!!! Options
@@ -88,7 +88,6 @@
       implicit none
 
       character(30),parameter:: inputfile='input_nude.dat'
-      integer :: i,j,k
 
       logical :: file_exists=.true.
 
@@ -392,7 +391,7 @@
     integer :: b
     open(unit_bonds_in,file=trim(file_bonds_input),status='old', action="read")
     read(unit_bonds_in,*) ! Info
-    read(unit_bonds_in,*) bondnrpoints
+    read(unit_bonds_in,*) bondpoints  
     read(unit_bonds_in,*) ! Info
     read(unit_bonds_in,*) nbonds
     allocate(bond_pair(1:2,1:nbonds))

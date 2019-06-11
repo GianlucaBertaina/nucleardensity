@@ -23,7 +23,7 @@
         REAL*8, DIMENSION(nat) :: dist
 
 
-        INTEGER :: i, j, k
+        INTEGER :: i
         REAL*8, PARAMETER :: maxdist_plus=2.d0
 
 
@@ -241,84 +241,93 @@
    END MODULE manage_cubes
 
 
-   MODULE manage_bonds
+  MODULE manage_bonds
 
-     use input_def, only : x_eq_cart, nat, bondnrpoints, nbonds,bond_pair,bond_name
-     implicit none
-     save
+    use input_def, only : x_eq_cart, nat, ncart,bondpoints  , nbonds,bond_pair,bond_name
+    implicit none
+    save
 
-     REAL*8,ALLOCATABLE  :: bondlmax(:), bonddr(:)
+    REAL*8,ALLOCATABLE  :: bonddr(:),bondvol(:)
 
-   contains
+    contains
 
-   SUBROUTINE set_bonds
-        implicit none
+    SUBROUTINE set_bonds
+    implicit none
+      REAL(8),PARAMETER :: pi = 3.141592653589793238462643383279503d0
+      REAL*8 :: dist
 
-        REAL*8 :: maxdist
-        REAL*8 :: dist
+      INTEGER :: i,j,b
+      REAL*8, PARAMETER :: maxdist_plus=4.d0 ! Bohr
 
-        INTEGER :: i,j,b
-        REAL*8, PARAMETER :: maxdist_plus=4.d0
+      ALLOCATE(bonddr(nbonds),bondvol(nbonds))
 
-        ALLOCATE(bondlmax(nbonds), bonddr(nbonds))
+      !       Compute distances
+      DO b=1, nbonds
 
-!       Compute distances
-        DO b=1, nbonds
+        i = bond_pair(1,b)
+        j = bond_pair(2,b)
 
-          i = bond_pair(1,b)
-          j = bond_pair(2,b)
+        dist = SQRT( (x_eq_cart(3*i - 2)-x_eq_cart(3*j - 2))**2 +&
+                     (x_eq_cart(3*i - 1)-x_eq_cart(3*j - 1))**2 +&
+                     (x_eq_cart(3*i    )-x_eq_cart(3*j    ))**2  )
 
-          dist = SQRT( (x_eq_cart(3*i - 2)-x_eq_cart(3*j - 2))**2 +&
-                       (x_eq_cart(3*i - 1)-x_eq_cart(3*j - 1))**2 +&
-                       (x_eq_cart(3*i    )-x_eq_cart(3*j    ))**2  )
+        bonddr(b)   = (dist + maxdist_plus) / bondpoints    ! Bohr
+        bondvol(b)  = bonddr(b) ! SICCOME NON ABBIAMO ROTAZIONI
+        !bondvol(b)  = 4*pi*bonddr(b)**2  ! DA VERIFICARE, SICCOME NON ABBIAMO ROTAZIONI
+      END DO
 
-          bondlmax(b) = dist + maxdist_plus
-          bonddr(b)   = bondlmax(b) / bondnrpoints
-        END DO
-
-   END SUBROUTINE set_bonds
-
-
-   SUBROUTINE find_bond_index(Ri, ir, b)
-        implicit none
-
-        INTEGER, INTENT(OUT) :: ir
-        REAL*8, INTENT(IN) :: Ri,b
-
-           ir = 1+INT(Ri / bonddr(b))
-           IF (ir > bondnrpoints) ir = bondnrpoints
-
-   END SUBROUTINE
+    END SUBROUTINE set_bonds
 
 
-   SUBROUTINE print_bonds(density,density_err)
-        use io_units_def
-        use constants
+    SUBROUTINE find_bond_index(xx,b, ir)
+    implicit none
 
-        implicit none
+      INTEGER, INTENT(OUT) :: ir
+      REAL*8, INTENT(IN)   :: xx(ncart)
+      INTEGER, INTENT(IN)  :: b
+      INTEGER              :: i,j
+      REAL*8               :: dist
 
-        REAL*8, intent(in) :: density(bondnrpoints, nbonds)
-        REAL*8, intent(in) :: density_err(bondnrpoints, nbonds)
-        character(25) :: filename
-        integer :: i, j, k, b
+      i = bond_pair(1,b)
+      j = bond_pair(2,b)
+      dist = SQRT( (xx(3*i - 2)-xx(3*j - 2))**2 +&
+                   (xx(3*i - 1)-xx(3*j - 1))**2 +&
+                   (xx(3*i    )-xx(3*j    ))**2  )
+
+      ir = 1+INT(dist / bonddr(b))
+      IF (ir > bondpoints  ) ir = bondpoints
+
+    END SUBROUTINE
+
+
+    SUBROUTINE print_bonds(density,density_err)
+    use io_units_def
+    use constants
+
+    implicit none
+
+      REAL*8, intent(in) :: density(bondpoints  , nbonds)
+      REAL*8, intent(in) :: density_err(bondpoints  , nbonds)
+      character(25) :: filename
+      integer :: i, b
 
       DO b=1, nbonds
 
         !Preparing filename string
-        WRITE(filename, "('bond_',1A,'.cube')") trim(bond_name(b))
+        WRITE(filename, "('bond_',1A,'.dat')") trim(bond_name(b))
 
         !associate a unit to the cube file
         OPEN (UNIT=unit_bonds_out+b, FILE=trim(filename), STATUS='replace')
 
         ! write out cube file introduction
-        WRITE(unit_bonds_out+b,*) "!Histogram density of bond. Values at the center of intervals"
+        WRITE(unit_bonds_out+b,*) "!Histogram density of bond. Values at the center of intervals (Ang unit)"
 
-        WRITE(unit_bonds_out+b,"(3(1ES22.15,1x))") (bonddr(b)*(i-0.5d0),density(i,b),density_err(i,b), i=1,bondnrpoints)
+        WRITE(unit_bonds_out+b,"(3(1ES22.15,1x))") (bonddr(b)*(i-0.5d0)*FROMauTOang,density(i,b),density_err(i,b), i=1,bondpoints  )
 
         CLOSE(unit_bonds_out+b)
 
       END DO
 
-   END SUBROUTINE print_bonds
+    END SUBROUTINE print_bonds
 
-   END MODULE manage_bonds
+  END MODULE manage_bonds

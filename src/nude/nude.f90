@@ -14,11 +14,10 @@
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: qq, xx 
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: q_expect_value, q_expect_value_h
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: x_expect_value, x_expect_value_h
-      REAL*8, ALLOCATABLE, DIMENSION(:)       :: norm 
-      REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:) :: density, density_sq, density_errorbar 
+      REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:) :: density !, density_sq , density_errorbar
+      REAL*8, ALLOCATABLE, DIMENSION(:,:)     :: bond_density, bond_density2,bond_density_errorbar
 
-
-      integer :: i, ix,iy,iz, istep, ii, j, k
+      integer :: i, ix,iy,iz, istep, ii,b
       real*8, dimension(3) :: Ri 
       real*8 :: bar_wfn_sq, tot_int, tot_int_sq
       !
@@ -36,11 +35,11 @@
       CHARACTER(len=10) :: str
       CHARACTER(len=20) :: filename
 
-      INTEGER :: density_elem, reminder, Nsteps_MC_tot
+      INTEGER :: density_elem, reminder, Nsteps_MC_tot,bond_density_elem
       REAL*8  :: tot_int_red, tot_int_sq_red
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: q_expect_value_red, q_expect_value_h_red
-      REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:) :: density_red, density_sq_red
-      
+      REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:) :: density_red  !, density_sq_red
+      REAL*8, ALLOCATABLE, DIMENSION(:,:)     :: bond_density_red,bond_density2_red
 
       CALL MPI_INIT(err_mpi)
       CALL MPI_COMM_RANK(MPI_COMM_WORLD, my_rank, err_mpi)
@@ -100,6 +99,27 @@
 !      allocate(density_errorbar(nxpoints, nypoints, nzpoints, nat))
 !      density_errorbar = 0.d0
       density_elem = nxpoints*nypoints*nzpoints*nat
+      ! Initialize bond density (1D array for each bond specified in input)
+      if (do_bonds) then
+        allocate(bond_density_red(1:bondpoints,1:nbonds))
+        allocate(bond_density2_red(1:bondpoints,1:nbonds))
+        allocate(bond_density(1:bondpoints,1:nbonds))
+        allocate(bond_density2(1:bondpoints,1:nbonds))
+        allocate(bond_density_errorbar(1:bondpoints,1:nbonds))
+        bond_density_elem = bondpoints * nbonds
+      else
+        allocate(bond_density_red(1,1))
+        allocate(bond_density2_red(1,1))
+        allocate(bond_density(1,1))
+        allocate(bond_density2(1,1))
+        allocate(bond_density_errorbar(1,1))
+        bond_density_elem = 1
+      endif
+      bond_density_red = 0.d0
+      bond_density2_red = 0.d0
+      bond_density = 0.d0
+      bond_density2 = 0.d0
+      bond_density_errorbar = 0.d0
       !
       ! Set multivariate gaussian width vector 
       ! for husimi distribution
@@ -163,7 +183,7 @@
           !
           ! Compute wfn^2/Gaussian at point qq  
           IF (switch_harm /= 1) THEN
-       call bar_wfn_squared(qq-q_eq,bar_wfn_sq)
+            call bar_wfn_squared(qq-q_eq,bar_wfn_sq)
           ELSE
              bar_wfn_sq = 1.d0
           END IF
@@ -177,11 +197,11 @@
     ! Print out structure in xyz format on file
           IF (Nsteps_MC <= 100000 .and. switch_print_mctraj==1) THEN
            
-    write(unit_trajMC+my_rank,* ) nat
-    write(unit_trajMC+my_rank,* ) 
-    do i = 1, nat
-        write(unit_trajMC+my_rank,* ) symb_list(i), xx(3*i-2:3*i) * FROMauTOang
-    enddo
+            write(unit_trajMC+my_rank,* ) nat
+            write(unit_trajMC+my_rank,* )
+            do i = 1, nat
+                write(unit_trajMC+my_rank,* ) symb_list(i), xx(3*i-2:3*i) * FROMauTOang
+            enddo
 
           END IF
           !
@@ -205,6 +225,15 @@
 !        density_sq(ix,iy,iz,i) = density_sq(ix,iy,iz,i) + bar_wfn_sq**2
         !
     enddo
+
+    ! Update bond densities
+    if (do_bonds) then
+      do b=1,nbonds
+        call find_bond_index(xx,b,ix)
+        bond_density(ix,b)  = bond_density(ix,b)  + bar_wfn_sq
+        bond_density2(ix,b) = bond_density2(ix,b) + bar_wfn_sq**2
+      enddo
+    endif
           !
           !
       ENDDO
@@ -223,6 +252,12 @@
                       MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
       CALL MPI_REDUCE(q_expect_value_h, q_expect_value_h_red, ncart, MPI_DOUBLE_PRECISION,&
                       MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
+      if (do_bonds) then
+        CALL MPI_REDUCE(bond_density, bond_density_red, bond_density_elem, MPI_DOUBLE_PRECISION,&
+                        MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
+        CALL MPI_REDUCE(bond_density2, bond_density2_red, bond_density_elem, MPI_DOUBLE_PRECISION,&
+                      MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
+      endif
       !
       ! close unit for fil with MC traj in xyz
       close(unit_trajMC+my_rank)
@@ -281,16 +316,10 @@
 !         density_errorbar = SQRT( (density_sq_red - density_red**2) / Nsteps_MC_tot )
            
          !density = density * (norm_gaussian_normal / Nsteps_MC)
-         !
-         ! Print out nuclear densities on output files **SPOSTATO SOTTO**
-         !print*, 'printing cube files'
-         !call print_cube(density)
          
          !Check the normalization of each nucleus density
-         ALLOCATE(norm(nat))
          DO ii=1, nat
-             norm(ii) = sum(density_red(:,:,:,ii))
-             print*, ii, ' unnormalized nucleus norm: ', norm(ii)
+             print*, ii, ' unnormalized nucleus norm: ', sum(density_red(:,:,:,ii))
          END DO
          !
          !Normalize by the voxel dimension
@@ -303,6 +332,21 @@
          !
 !         print*, 'printing cube files with density error bar'
 !         call print_cube_errorbar(density_errorbar)
+         !
+         if (do_bonds) then
+           bond_density_red  = bond_density_red  / tot_int_red
+           bond_density2_red = bond_density2_red / tot_int_red
+           bond_density_errorbar = SQRT( abs(bond_density2_red - bond_density2_red**2) / Nsteps_MC_tot )
+           !
+           do b=1,nbonds
+             bond_density_red(:,b)      = bond_density_red(:,b) / bondvol(b)
+             bond_density_errorbar(:,b) = bond_density_errorbar(:,b) / bondvol(b)
+           enddo
+           !
+           ! Print out bond distributions on output files
+           print*, 'printing bond files'
+           call print_bonds(bond_density_red,bond_density_errorbar)
+         endif
          !
          print*,'done'
          print*, '  '
