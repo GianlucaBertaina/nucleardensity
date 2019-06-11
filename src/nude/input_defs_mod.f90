@@ -46,6 +46,7 @@
       character(len=20),allocatable :: bond_name(:)
 !!!!!! Options
       logical   :: do_bonds=.false.
+      logical   :: do_densities=.false.
       !
       contains
 
@@ -127,7 +128,9 @@
       read(unit_input,*) ! Here a comment line
       read(unit_input,*) switch_harm! Harmonic 1 / Hanaramonic /=1 
       read(unit_input,*) ! Here a comment line
-      read(unit_input,*) switch_print_mctraj! Print Mc traj 1 / Don't print /=1 
+      read(unit_input,*) switch_print_mctraj! Print Mc traj 1 / Don't print /=1
+      read(unit_input,*) ! Here a comment line
+      read(unit_input,*) do_densities ! option
       read(unit_input,*) ! Here a comment line
       read(unit_input,*) file_bonds_input ! file with bonds settings
       !
@@ -186,7 +189,7 @@
   STOP
       endif
       !
-      if (trim(file_bonds_input)=="0") then
+      if (trim(file_bonds_input)=="F") then
         do_bonds=.false.
       else
         do_bonds=.true.
