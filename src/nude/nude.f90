@@ -14,10 +14,7 @@
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: q_expect_value, q_expect_value_h
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: x_expect_value, x_expect_value_h
       !
-      REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:) :: density !, density_sq , density_errorbar
-
-      integer :: i, ix,iy,iz, istep, ii
-      real*8  :: Ri(3)
+      integer :: i, istep
       real*8  :: bar_wfn_sq, tot_int, tot_int_sq
       !
       real*8  :: det_omega, norm_gaussian_normal
@@ -34,10 +31,9 @@
       CHARACTER(len=10) :: str
       CHARACTER(len=20) :: filename
 
-      INTEGER :: density_elem, reminder, Nsteps_MC_tot
+      INTEGER :: reminder, Nsteps_MC_tot
       REAL*8  :: tot_int_red, tot_int_sq_red
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: q_expect_value_red, q_expect_value_h_red
-      REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:) :: density_red  !, density_sq_red
 !!!!!!!
       !
       CALL MPI_INIT(err_mpi)
@@ -83,24 +79,7 @@
       allocate(q_eq(ncart))
       call to_normal(x_eq_cart,q_eq)
       !
-      if (do_densities) then
-        ! Initialize density (a 3D array for each atom)
-        allocate(density(nxpoints, nypoints, nzpoints, nat))
-        !allocate(density_sq(nxpoints, nypoints, nzpoints, nat))
-        allocate(density_red(nxpoints, nypoints, nzpoints, nat))
-        !allocate(density_sq_red(nxpoints, nypoints, nzpoints, nat))
-        !allocate(density_errorbar(nxpoints, nypoints, nzpoints, nat))
-        density_elem = nxpoints*nypoints*nzpoints*nat
-      else
-        allocate(density(1,1,1,1))
-        allocate(density_red(1,1,1,1))
-        density_elem = 1
-      endif
-      density           = 0.d0
-      density_red       = 0.d0
-      !density_sq       = 0.d0
-      !density_sq_red   = 0.d0
-      !density_errorbar = 0.d0
+      if (do_densities) call allocate_densities()
       !
       ! Initialize bond density (1D array for each bond specified in input)
       if (do_bonds) call allocate_bonds()
@@ -197,21 +176,7 @@
         !
         !
         ! Update corresponding densities
-        if (do_densities) then
-          do i = 1,nat
-            !
-            ! coordinates in au of i^th atom
-            Ri(:) = xx(3*i-2:3*i)
-            !
-            ! Corresponding grid cube indexes
-            call find_cube_index(Ri,ix,iy,iz)
-            !
-            ! Update density
-            density(ix,iy,iz,i) = density(ix,iy,iz,i) + bar_wfn_sq
-            !density_sq(ix,iy,iz,i) = density_sq(ix,iy,iz,i) + bar_wfn_sq**2
-            !
-          enddo
-        endif
+        if (do_densities) call update_densities(xx,bar_wfn_sq)
         !
         ! Update bond densities
         if (do_bonds) call update_bonds(xx,bar_wfn_sq)
@@ -225,10 +190,7 @@
       CALL MPI_REDUCE(q_expect_value, q_expect_value_red, ncart, MPI_DOUBLE_PRECISION,MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
       CALL MPI_REDUCE(q_expect_value_h, q_expect_value_h_red, ncart, MPI_DOUBLE_PRECISION,MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
       !
-      if (do_densities) then
-        CALL MPI_REDUCE(density, density_red, density_elem, MPI_DOUBLE_PRECISION,MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
-        !CALL MPI_REDUCE(density_sq, density_sq_red, density_elem, MPI_DOUBLE_PRECISION,MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
-      endif
+      if (do_densities) CALL MPI_REDUCE_DENSITIES()
       !
       if (do_bonds) CALL MPI_REDUCE_BONDS()
 !!!!!!!
@@ -274,36 +236,7 @@
         ! Normalize density:
         print*, 'Total integral of wf^2, Nsteps: ', tot_int_red , Nsteps_MC_tot
         !
-        if (do_densities) then
-          !
-          ! NO
-          !density_red = density_red / Nsteps_MC_tot
-          !density_sq_red = density_sq_red / Nsteps_MC_tot
-          !
-          ! NO
-          !density = density * (norm_gaussian_normal / Nsteps_MC)
-          !
-          ! SI'
-          density_red = density_red / tot_int_red
-          !density_sq_red = density_sq_red / tot_int_red
-          !density_errorbar = SQRT( (density_sq_red - density_red**2) / Nsteps_MC_tot )
-          !
-          !Normalize by the voxel dimension
-          density_red = density_red / voxel
-          !density_errorbar = density_errorbar / voxel
-          !
-          !Check the normalization of each nucleus density
-          DO ii=1, nat
-            print*, 'Check norm of density of atom ',ii,': ', sum(density_red(:,:,:,ii))*voxel
-          END DO
-          !
-          ! Print out nuclear densities on output files
-          print*, 'Printing cube files'
-          call print_cube(density_red)
-          !
-          ! print*, 'printing cube files with density error bar'
-          ! call print_cube_errorbar(density_errorbar)
-        endif
+        if (do_densities) call print_normalized_densities(Nsteps_MC_tot,tot_int_red)
         !
         if (do_bonds) call print_normalized_bonds(Nsteps_MC_tot,tot_int_red)
         !

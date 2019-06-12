@@ -1,17 +1,17 @@
-   MODULE manage_cubes
-
-
+MODULE manage_cubes
+   use input_def
    implicit none
 
    save
 
-   REAL*8  :: cubelmax, dx, dy, dz,voxel
+   REAL*8              :: cubelmax, dx, dy, dz,voxel
+   REAL*8, ALLOCATABLE :: density(:,:,:,:) !, density_sq(:,:,:,:) , density_errorbar(:,:,:,:)
+   REAL*8, ALLOCATABLE :: density_red(:,:,:,:)  !, density_sq_red(:,:,:,:)
+   INTEGER             :: density_elem
  
    contains
 
-
    SUBROUTINE set_cube
-
 
         use input_def,    only: x_eq_cart, nat
         use input_def,    only: nxpoints, nypoints, nzpoints   
@@ -78,6 +78,43 @@
 
    END SUBROUTINE set_cube
 
+   SUBROUTINE allocate_densities()
+      ! Initialize density (a 3D array for each atom)
+      allocate(density(nxpoints, nypoints, nzpoints, nat))
+      !allocate(density_sq(nxpoints, nypoints, nzpoints, nat))
+      allocate(density_red(nxpoints, nypoints, nzpoints, nat))
+      !allocate(density_sq_red(nxpoints, nypoints, nzpoints, nat))
+      !allocate(density_errorbar(nxpoints, nypoints, nzpoints, nat))
+      density_elem = nxpoints*nypoints*nzpoints*nat
+      density           = 0.d0
+      density_red       = 0.d0
+      !density_sq       = 0.d0
+      !density_sq_red   = 0.d0
+      !density_errorbar = 0.d0
+   END SUBROUTINE
+
+
+    SUBROUTINE update_densities(xx,bar_wfn_sq)
+      real*8, intent(in) :: xx(1:ncart)
+      real*8, intent(in) :: bar_wfn_sq
+      integer            :: i,ix,iy,iz
+      real*8             :: Ri(3)
+
+      do i = 1,nat
+        !
+        ! coordinates in au of i^th atom
+        Ri(:) = xx(3*i-2:3*i)
+        !
+        ! Corresponding grid cube indexes
+        call find_cube_index(Ri,ix,iy,iz)
+        !
+        ! Update density
+        density(ix,iy,iz,i) = density(ix,iy,iz,i) + bar_wfn_sq
+        !density_sq(ix,iy,iz,i) = density_sq(ix,iy,iz,i) + bar_wfn_sq**2
+        !
+      enddo
+
+    END SUBROUTINE
 
 
    SUBROUTINE find_cube_index(Ri, ix, iy, iz)
@@ -133,6 +170,17 @@
    END SUBROUTINE find_cube_index
 
 
+    SUBROUTINE MPI_REDUCE_DENSITIES()
+
+      use mpimod
+      implicit none
+      integer :: err_mpi
+
+      CALL MPI_REDUCE(density, density_red, density_elem, MPI_DOUBLE_PRECISION,MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
+      !CALL MPI_REDUCE(density_sq, density_sq_red, density_elem, MPI_DOUBLE_PRECISION,MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
+
+    END SUBROUTINE
+
 
    SUBROUTINE print_cube(density)
 
@@ -147,46 +195,83 @@
         character(25) :: filename
         integer :: i, j, k, iat
 
-      DO iat=1, nat
+        DO iat=1, nat
 
-        !Preparing filename string
-        WRITE(filename, "('nucl_',I0,'.cube')") iat
-        
-        !associate a unit to the cube file
-        OPEN (UNIT=unit_cube, FILE=trim(filename), STATUS='replace')
+          !Preparing filename string
+          WRITE(filename, "('nucl_',I0,'.cube')") iat
 
-        ! write out cube file introduction
-        WRITE(unit_cube,*) "!Cube format assumes densities are printed at vertices of cubes"
-        WRITE(unit_cube,*) "!voxels index order: Z, Y, X"
-        ! Shifts origin of box (vertex of box) so that it corresponds to the center of 
-        ! the first cube in this program convention
-        ! TODO: do not shift if the main routine is modified to evaluate densities at vertices
+          !associate a unit to the cube file
+          OPEN (UNIT=unit_cube, FILE=trim(filename), STATUS='replace')
 
-        WRITE(unit_cube,"(1I5,3(1ES22.15,1x))") nat, -cubelmax + dx*0.5d0 ,&
-                                                     -cubelmax + dy*0.5d0 ,&
-                                                     -cubelmax + dz*0.5d0
-        WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nxpoints, dx, zero_real, zero_real
-        WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nypoints, zero_real, dy, zero_real
-        WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nzpoints, zero_real, zero_real, dz
+          ! write out cube file introduction
+          WRITE(unit_cube,*) "!Cube format assumes densities are printed at vertices of cubes"
+          WRITE(unit_cube,*) "!voxels index order: Z, Y, X"
+          ! Shifts origin of box (vertex of box) so that it corresponds to the center of
+          ! the first cube in this program convention
+          ! TODO: do not shift if the main routine is modified to evaluate densities at vertices
+
+          WRITE(unit_cube,"(1I5,3(1ES22.15,1x))") nat, -cubelmax + dx*0.5d0 ,&
+                                                       -cubelmax + dy*0.5d0 ,&
+                                                       -cubelmax + dz*0.5d0
+          WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nxpoints, dx, zero_real, zero_real
+          WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nypoints, zero_real, dy, zero_real
+          WRITE(unit_cube,"(1I6,3(1ES22.15,1x))") nzpoints, zero_real, zero_real, dz
 
 
-!        Print out the equilibrium geometry of the molecule
-         DO i=1, nat
-            WRITE(unit_cube,"(1I4,4(1ES22.15,1x))") Z_nuclei(i), real(Z_nuclei(i),8), &
-                                                                 x_eq_cart(3*i-2:3*i)
-         END DO
-
-         DO i=1, nxpoints
-           DO j=1, nypoints
-                 WRITE(unit_cube, '( 6F12.6 )') (density(i, j, k, iat), k=1, nzpoints)
+  !        Print out the equilibrium geometry of the molecule
+           DO i=1, nat
+              WRITE(unit_cube,"(1I4,4(1ES22.15,1x))") Z_nuclei(i), real(Z_nuclei(i),8), &
+                                                                   x_eq_cart(3*i-2:3*i)
            END DO
-         END DO
 
-         CLOSE(unit_cube)
+           DO i=1, nxpoints
+             DO j=1, nypoints
+                   WRITE(unit_cube, '( 6F12.6 )') (density(i, j, k, iat), k=1, nzpoints)
+             END DO
+           END DO
 
-      END DO
+           CLOSE(unit_cube)
+
+        END DO
 
    END SUBROUTINE print_cube
+
+
+    SUBROUTINE print_normalized_densities(Nsteps_MC_tot,tot_int_red)
+      integer, intent(in) :: Nsteps_MC_tot
+      real*8,  intent(in) :: tot_int_red
+
+      integer :: ii
+      !
+      ! NO
+      !density_red = density_red / Nsteps_MC_tot
+      !density_sq_red = density_sq_red / Nsteps_MC_tot
+      !
+      ! NO
+      !density = density * (norm_gaussian_normal / Nsteps_MC)
+      !
+      ! SI'
+      density_red = density_red / tot_int_red
+      !density_sq_red = density_sq_red / tot_int_red
+      !density_errorbar = SQRT( (density_sq_red - density_red**2) / Nsteps_MC_tot )
+      !
+      !Normalize by the voxel dimension
+      density_red = density_red / voxel
+      !density_errorbar = density_errorbar / voxel
+      !
+      !Check the normalization of each nucleus density
+      DO ii=1, nat
+        print*, 'Check norm of density of atom ',ii,': ', sum(density_red(:,:,:,ii))*voxel
+      END DO
+      !
+      ! Print out nuclear densities on output files
+      print*, 'Printing cube files'
+      call print_cube(density_red)
+      !
+      ! print*, 'printing cube files with density error bar'
+      ! call print_cube_errorbar(density_errorbar)
+
+    END SUBROUTINE
 
 
    SUBROUTINE print_cube_errorbar(density)
@@ -240,10 +325,10 @@
 
    END SUBROUTINE print_cube_errorbar
 
-   END MODULE manage_cubes
+END MODULE manage_cubes
 
 
-  MODULE manage_bonds
+MODULE manage_bonds
 
     use input_def, only : x_eq_cart, nat, ncart,bondpoints  , nbonds,bond_pair,bond_name
     implicit none
@@ -284,39 +369,36 @@
 
     END SUBROUTINE set_bonds
 
+
     SUBROUTINE allocate_bonds()
-!      if (do_bonds) then
-        allocate(bond_density_red(1:bondpoints,1:nbonds))
-        allocate(bond_density2_red(1:bondpoints,1:nbonds))
-        allocate(bond_density(1:bondpoints,1:nbonds))
-        allocate(bond_density2(1:bondpoints,1:nbonds))
-        allocate(bond_density_errorbar(1:bondpoints,1:nbonds))
-        bond_density_elem = bondpoints * nbonds
-!      else
-!        allocate(bond_density_red(1,1))
-!        allocate(bond_density2_red(1,1))
-!        allocate(bond_density(1,1))
-!        allocate(bond_density2(1,1))
-!        allocate(bond_density_errorbar(1,1))
-!        bond_density_elem = 1
-!      endif
+
+      allocate(bond_density_red(1:bondpoints,1:nbonds))
+      allocate(bond_density2_red(1:bondpoints,1:nbonds))
+      allocate(bond_density(1:bondpoints,1:nbonds))
+      allocate(bond_density2(1:bondpoints,1:nbonds))
+      allocate(bond_density_errorbar(1:bondpoints,1:nbonds))
+      bond_density_elem = bondpoints * nbonds
       bond_density_red      = 0.d0
       bond_density2_red     = 0.d0
       bond_density          = 0.d0
       bond_density2         = 0.d0
       bond_density_errorbar = 0.d0
+
     END SUBROUTINE
 
 
     SUBROUTINE update_bonds(xx,bar_wfn_sq)
+
       real*8, intent(in) :: xx(1:ncart)
       real*8, intent(in) :: bar_wfn_sq
-      integer :: b,ix
+      integer            :: b,ix
+
       do b=1,nbonds
         call find_bond_index(xx,b,ix)
         bond_density(ix,b)  = bond_density(ix,b)  + bar_wfn_sq
         bond_density2(ix,b) = bond_density2(ix,b) + bar_wfn_sq**2
       enddo
+
     END SUBROUTINE
 
 
@@ -370,7 +452,7 @@
         OPEN (UNIT=unit_bonds_out+b, FILE=trim(filename), STATUS='replace')
 
         ! write out cube file introduction
-        WRITE(unit_bonds_out+b,*) "!Histogram density of bond. Values at the center of intervals (Ang unit)"
+        WRITE(unit_bonds_out+b,*) "#Histogram density of bond. Values at the center of intervals (Ang unit)"
 
         WRITE(unit_bonds_out+b,"(3(1ES22.15,1x))") (bonddr(b)*(i-0.5d0)*FROMauTOang,density(i,b),density_err(i,b), i=1,bondpoints  )
 
@@ -407,4 +489,4 @@
       !
     END SUBROUTINE
 
-  END MODULE manage_bonds
+END MODULE manage_bonds
