@@ -18,3 +18,10 @@
 
 
       END MODULE io_units_def
+
+
+      MODULE mpimod
+        implicit none
+        include 'mpif.h'
+        integer my_rank, num_procs
+      END MODULE

@@ -5,10 +5,9 @@
       use input_def
       use manage_cubes
       use manage_bonds
+      use mpimod
 
       implicit none
-
-      include "mpif.h"
 
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: q_eq, sigma_gaus 
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: qq, xx 
@@ -16,9 +15,8 @@
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: x_expect_value, x_expect_value_h
       !
       REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:) :: density !, density_sq , density_errorbar
-      REAL*8, ALLOCATABLE, DIMENSION(:,:)     :: bond_density, bond_density2,bond_density_errorbar
 
-      integer :: i, ix,iy,iz, istep, ii,b
+      integer :: i, ix,iy,iz, istep, ii
       real*8  :: Ri(3)
       real*8  :: bar_wfn_sq, tot_int, tot_int_sq
       !
@@ -29,18 +27,17 @@
       real*8  :: xrand1,xrand2,y1,y2
 
 !!!!!!!MPI variables
-      INTEGER :: my_rank, num_procs, err_mpi
+      INTEGER :: err_mpi
       REAL*8  :: t_start, t_end
 
       CHARACTER(len=4)  :: str1
       CHARACTER(len=10) :: str
       CHARACTER(len=20) :: filename
 
-      INTEGER :: density_elem, reminder, Nsteps_MC_tot,bond_density_elem
+      INTEGER :: density_elem, reminder, Nsteps_MC_tot
       REAL*8  :: tot_int_red, tot_int_sq_red
       REAL*8, ALLOCATABLE, DIMENSION(:)       :: q_expect_value_red, q_expect_value_h_red
       REAL*8, ALLOCATABLE, DIMENSION(:,:,:,:) :: density_red  !, density_sq_red
-      REAL*8, ALLOCATABLE, DIMENSION(:,:)     :: bond_density_red,bond_density2_red
 !!!!!!!
       !
       CALL MPI_INIT(err_mpi)
@@ -106,26 +103,7 @@
       !density_errorbar = 0.d0
       !
       ! Initialize bond density (1D array for each bond specified in input)
-      if (do_bonds) then
-        allocate(bond_density_red(1:bondpoints,1:nbonds))
-        allocate(bond_density2_red(1:bondpoints,1:nbonds))
-        allocate(bond_density(1:bondpoints,1:nbonds))
-        allocate(bond_density2(1:bondpoints,1:nbonds))
-        allocate(bond_density_errorbar(1:bondpoints,1:nbonds))
-        bond_density_elem = bondpoints * nbonds
-      else
-        allocate(bond_density_red(1,1))
-        allocate(bond_density2_red(1,1))
-        allocate(bond_density(1,1))
-        allocate(bond_density2(1,1))
-        allocate(bond_density_errorbar(1,1))
-        bond_density_elem = 1
-      endif
-      bond_density_red      = 0.d0
-      bond_density2_red     = 0.d0
-      bond_density          = 0.d0
-      bond_density2         = 0.d0
-      bond_density_errorbar = 0.d0
+      if (do_bonds) call allocate_bonds()
       !
       ! Set multivariate gaussian width vector 
       ! for husimi distribution
@@ -236,13 +214,7 @@
         endif
         !
         ! Update bond densities
-        if (do_bonds) then
-          do b=1,nbonds
-            call find_bond_index(xx,b,ix)
-            bond_density(ix,b)  = bond_density(ix,b)  + bar_wfn_sq
-            bond_density2(ix,b) = bond_density2(ix,b) + bar_wfn_sq**2
-          enddo
-        endif
+        if (do_bonds) call update_bonds(xx,bar_wfn_sq)
         !
       ENDDO
 
@@ -258,10 +230,7 @@
         !CALL MPI_REDUCE(density_sq, density_sq_red, density_elem, MPI_DOUBLE_PRECISION,MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
       endif
       !
-      if (do_bonds) then
-        CALL MPI_REDUCE(bond_density,bond_density_red,bond_density_elem,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,err_mpi)
-        CALL MPI_REDUCE(bond_density2, bond_density2_red,bond_density_elem,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,err_mpi)
-      endif
+      if (do_bonds) CALL MPI_REDUCE_BONDS()
 !!!!!!!
       ! close unit for fil with MC traj in xyz
       close(unit_trajMC+my_rank)
@@ -336,28 +305,7 @@
           ! call print_cube_errorbar(density_errorbar)
         endif
         !
-        if (do_bonds) then
-          !
-          bond_density_red  = bond_density_red  / tot_int_red
-          bond_density2_red = bond_density2_red / tot_int_red
-          ! Evaluation of Monte Carlo uncertainty of the mean
-          bond_density_errorbar = SQRT( abs(bond_density2_red - bond_density2_red**2) / Nsteps_MC_tot )
-          !
-          do b=1,nbonds
-            bond_density_red(:,b)      = bond_density_red(:,b) / bondvol(b)
-            bond_density_errorbar(:,b) = bond_density_errorbar(:,b) / bondvol(b)
-          enddo
-
-          !Check the normalization of each nucleus density
-          DO b=1, nbonds
-            print*, 'Check norm of bond distribution ',b,': ', sum(bond_density_red(:,b))*bondvol(b)
-          END DO
-          !
-          ! Print out bond distributions on output files
-          print*, 'Printing bond files'
-          call print_bonds(bond_density_red,bond_density_errorbar)
-          !
-        endif
+        if (do_bonds) call print_normalized_bonds(Nsteps_MC_tot,tot_int_red)
         !
         print*,'Done'
         print*, '  '

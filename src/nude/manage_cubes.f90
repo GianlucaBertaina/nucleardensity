@@ -249,13 +249,17 @@
     implicit none
     save
 
-    REAL*8,ALLOCATABLE  :: bonddr(:),bondvol(:)
+    REAL*8, ALLOCATABLE :: bond_density(:,:), bond_density2(:,:),bond_density_errorbar(:,:)
+    REAL*8, ALLOCATABLE :: bonddr(:),bondvol(:)
+
+    INTEGER             :: bond_density_elem
+    REAL*8, ALLOCATABLE :: bond_density_red(:,:),bond_density2_red(:,:)
 
     contains
 
     SUBROUTINE set_bonds
-    use constants
-    implicit none
+      use constants
+      implicit none
       REAL*8 :: dist
 
       INTEGER :: i,j,b
@@ -280,6 +284,41 @@
 
     END SUBROUTINE set_bonds
 
+    SUBROUTINE allocate_bonds()
+!      if (do_bonds) then
+        allocate(bond_density_red(1:bondpoints,1:nbonds))
+        allocate(bond_density2_red(1:bondpoints,1:nbonds))
+        allocate(bond_density(1:bondpoints,1:nbonds))
+        allocate(bond_density2(1:bondpoints,1:nbonds))
+        allocate(bond_density_errorbar(1:bondpoints,1:nbonds))
+        bond_density_elem = bondpoints * nbonds
+!      else
+!        allocate(bond_density_red(1,1))
+!        allocate(bond_density2_red(1,1))
+!        allocate(bond_density(1,1))
+!        allocate(bond_density2(1,1))
+!        allocate(bond_density_errorbar(1,1))
+!        bond_density_elem = 1
+!      endif
+      bond_density_red      = 0.d0
+      bond_density2_red     = 0.d0
+      bond_density          = 0.d0
+      bond_density2         = 0.d0
+      bond_density_errorbar = 0.d0
+    END SUBROUTINE
+
+
+    SUBROUTINE update_bonds(xx,bar_wfn_sq)
+      real*8, intent(in) :: xx(1:ncart)
+      real*8, intent(in) :: bar_wfn_sq
+      integer :: b,ix
+      do b=1,nbonds
+        call find_bond_index(xx,b,ix)
+        bond_density(ix,b)  = bond_density(ix,b)  + bar_wfn_sq
+        bond_density2(ix,b) = bond_density2(ix,b) + bar_wfn_sq**2
+      enddo
+    END SUBROUTINE
+
 
     SUBROUTINE find_bond_index(xx,b, ir)
     implicit none
@@ -302,11 +341,20 @@
     END SUBROUTINE
 
 
-    SUBROUTINE print_bonds(density,density_err)
-    use io_units_def
-    use constants
+    SUBROUTINE MPI_REDUCE_BONDS()
+      use mpimod
+      implicit none
+      integer :: err_mpi
+      CALL MPI_REDUCE(bond_density,bond_density_red,bond_density_elem,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,err_mpi)
+      CALL MPI_REDUCE(bond_density2, bond_density2_red,bond_density_elem,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,err_mpi)
+    END SUBROUTINE
 
-    implicit none
+
+    SUBROUTINE print_bonds(density,density_err)
+      use io_units_def
+      use constants
+
+      implicit none
 
       REAL*8, intent(in) :: density(bondpoints  , nbonds)
       REAL*8, intent(in) :: density_err(bondpoints  , nbonds)
@@ -328,8 +376,35 @@
 
         CLOSE(unit_bonds_out+b)
 
-      END DO
+      ENDDO
 
     END SUBROUTINE print_bonds
+
+    SUBROUTINE print_normalized_bonds(Nsteps_MC_tot,tot_int_red)
+      integer, intent(in) :: Nsteps_MC_tot
+      real*8,  intent(in) :: tot_int_red
+
+      integer :: b
+      !
+      bond_density_red  = bond_density_red  / tot_int_red
+      bond_density2_red = bond_density2_red / tot_int_red
+      ! Evaluation of Monte Carlo uncertainty of the mean
+      bond_density_errorbar = SQRT( abs(bond_density2_red - bond_density2_red**2) / Nsteps_MC_tot )
+      !
+      do b=1,nbonds
+        bond_density_red(:,b)      = bond_density_red(:,b) / bondvol(b)
+        bond_density_errorbar(:,b) = bond_density_errorbar(:,b) / bondvol(b)
+      enddo
+
+      !Check the normalization of each nucleus density
+      DO b=1, nbonds
+        print*, 'Check norm of bond distribution ',b,': ', sum(bond_density_red(:,b))*bondvol(b)
+      END DO
+      !
+      ! Print out bond distributions on output files
+      print*, 'Printing bond files'
+      call print_bonds(bond_density_red,bond_density_errorbar)
+      !
+    END SUBROUTINE
 
   END MODULE manage_bonds
