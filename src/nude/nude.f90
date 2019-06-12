@@ -57,25 +57,22 @@
          print*, '  '
       END IF
       !
-      !
-      IF (my_rank == 0) print*, 'setting parameters from input files'
+      IF (my_rank == 0) print*, 'Setting parameters from input files'
       call get_input_params
       IF (my_rank == 0) THEN
-         print*,'done'
-         print*, '  '
+         print*,'Done'
          print*, '  '
       END IF
       !
-      !
-      IF (my_rank == 0) print*, 'setting grid and parameters for cube files'
+      IF (my_rank == 0) print*, 'Setting grid and parameters for cube files'
       call set_cube
       !
-      IF (my_rank == 0) print*, "setting bonds"
+      IF (my_rank == 0) print*, "Setting bonds"
+      !
       if (do_bonds) call set_bonds
       !
       IF (my_rank == 0) THEN
-         print*,'done'
-         print*, '  '
+         print*,'Done'
          print*, '  '
       END IF
       !
@@ -224,17 +221,17 @@
         ! Update corresponding densities
         if (do_densities) then
           do i = 1,nat
-          !
-          ! coordinates in au of i^th atom
-          Ri(:) = xx(3*i-2:3*i)
-          !
-          ! Corresponding grid cube indexes
-          call find_cube_index(Ri,ix,iy,iz)
-          !
-          ! Update density
-          density(ix,iy,iz,i) = density(ix,iy,iz,i) + bar_wfn_sq
-          !density_sq(ix,iy,iz,i) = density_sq(ix,iy,iz,i) + bar_wfn_sq**2
-          !
+            !
+            ! coordinates in au of i^th atom
+            Ri(:) = xx(3*i-2:3*i)
+            !
+            ! Corresponding grid cube indexes
+            call find_cube_index(Ri,ix,iy,iz)
+            !
+            ! Update density
+            density(ix,iy,iz,i) = density(ix,iy,iz,i) + bar_wfn_sq
+            !density_sq(ix,iy,iz,i) = density_sq(ix,iy,iz,i) + bar_wfn_sq**2
+            !
           enddo
         endif
         !
