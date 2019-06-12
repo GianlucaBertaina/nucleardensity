@@ -254,8 +254,8 @@
     contains
 
     SUBROUTINE set_bonds
+    use constants
     implicit none
-      REAL(8),PARAMETER :: pi = 3.141592653589793238462643383279503d0
       REAL*8 :: dist
 
       INTEGER :: i,j,b

@@ -445,10 +445,10 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       subroutine Husimi(x1,x2,y1,y2,u,sigma)
+      use constants
            implicit none
       
            real(8) :: x1,x2,y1,y2,u,sigma
-           REAL(8),PARAMETER :: pi = 3.141592653589793238462643383279503d0
       
            y1 = sqrt(-2.0d0*log(x1)) * cos( 2.0d0*pi*x2 )
            y2 = sqrt(-2.0d0*log(x1)) * sin( 2.0d0*pi*x2 )
