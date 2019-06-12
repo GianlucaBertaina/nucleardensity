@@ -5,7 +5,7 @@
 
    save
 
-   REAL*8  :: cubelmax, dx, dy, dz
+   REAL*8  :: cubelmax, dx, dy, dz,voxel
  
    contains
 
@@ -68,6 +68,8 @@
         dx = cubelmax*2 / REAL(nxpoints, 8)
         dy = cubelmax*2 / REAL(nypoints, 8)
         dz = cubelmax*2 / REAL(nzpoints, 8)
+
+        voxel=dx*dy*dz
 
         !print*, 'Voxels edges lenght (a.u.)'
         !print*, 'dx =', dx
@@ -314,7 +316,7 @@
       DO b=1, nbonds
 
         !Preparing filename string
-        WRITE(filename, "('bond_',1A,'.dat')") trim(bond_name(b))
+        WRITE(filename, "('bond_',1A,'.out')") trim(bond_name(b))
 
         !associate a unit to the cube file
         OPEN (UNIT=unit_bonds_out+b, FILE=trim(filename), STATUS='replace')

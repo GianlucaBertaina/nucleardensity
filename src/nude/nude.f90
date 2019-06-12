@@ -171,7 +171,7 @@
       IF (my_rank == 0) then
         WRITE(*,*) 'All processes but rank 0 do ', Nsteps_MC, ' steps.'
         Nsteps_MC = Nsteps_MC + reminder
-        WRITE(*,*) 'Rank 0 does ', Nsteps_MC, ' steps.'
+        WRITE(*,*) 'Rank 0 does                 ', Nsteps_MC, ' steps.'
       ENDIF
 
       ! MC SAMPLING CYCLE
@@ -301,12 +301,12 @@
         close(unit_geo_exp)
         close(unit_geo_exp_h)
         !
+        ! Norm of Gaussian: not used
         det_omega = product(omega_vh(1:nvib))
-        !
         norm_gaussian_normal = DSQRT( (2*pi)**nvib * 0.5d0 / det_omega )
         !
         ! Normalize density:
-        print*, 'Total integral of wf^2, Nsteps, Gauss norm: ', tot_int_red , Nsteps_MC_tot ,norm_gaussian_normal
+        print*, 'Total integral of wf^2, Nsteps: ', tot_int_red , Nsteps_MC_tot
         !
         if (do_densities) then
           !
@@ -322,14 +322,14 @@
           !density_sq_red = density_sq_red / tot_int_red
           !density_errorbar = SQRT( (density_sq_red - density_red**2) / Nsteps_MC_tot )
           !
+          !Normalize by the voxel dimension
+          density_red = density_red / voxel
+          !density_errorbar = density_errorbar / voxel
+          !
           !Check the normalization of each nucleus density
           DO ii=1, nat
-            print*, ii, ' unnormalized nucleus norm: ', sum(density_red(:,:,:,ii))
+            print*, 'Check norm of density of atom ',ii,': ', sum(density_red(:,:,:,ii))*voxel
           END DO
-          !
-          !Normalize by the voxel dimension
-          density_red = density_red / (dx*dy*dz)
-          !density_errorbar = density_errorbar / (dx*dy*dz)
           !
           ! Print out nuclear densities on output files
           print*, 'Printing cube files'
@@ -343,12 +343,18 @@
           !
           bond_density_red  = bond_density_red  / tot_int_red
           bond_density2_red = bond_density2_red / tot_int_red
+          ! Evaluation of Monte Carlo uncertainty of the mean
           bond_density_errorbar = SQRT( abs(bond_density2_red - bond_density2_red**2) / Nsteps_MC_tot )
           !
           do b=1,nbonds
             bond_density_red(:,b)      = bond_density_red(:,b) / bondvol(b)
             bond_density_errorbar(:,b) = bond_density_errorbar(:,b) / bondvol(b)
           enddo
+
+          !Check the normalization of each nucleus density
+          DO b=1, nbonds
+            print*, 'Check norm of bond distribution ',b,': ', sum(bond_density_red(:,b))*bondvol(b)
+          END DO
           !
           ! Print out bond distributions on output files
           print*, 'Printing bond files'
