@@ -357,7 +357,8 @@
 
       implicit none
 
-      integer :: K, indx
+      integer :: K
+      real*8  :: indx
       !
       !
       allocate(h_vec(nvib,dim_K))

@@ -446,7 +446,7 @@ MODULE manage_bonds
       DO b=1, nbonds
 
         !Preparing filename string
-        WRITE(filename, "('bond_',1A,'.out')") trim(bond_name(b))
+        WRITE(filename, "('bond_',1A,'.out')") adjustl(trim(bond_name(b)))
 
         !associate a unit to the cube file
         OPEN (UNIT=unit_bonds_out+b, FILE=trim(filename), STATUS='replace')

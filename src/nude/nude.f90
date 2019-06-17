@@ -123,9 +123,9 @@
       reminder = MOD(Nsteps_MC, num_procs)
       Nsteps_MC = (Nsteps_MC - reminder) / num_procs
       IF (my_rank == 0) then
-        WRITE(*,*) 'All processes but rank 0 do ', Nsteps_MC, ' steps.'
+        WRITE(*,*) 'All ',num_procs,' processes but rank 0 do ', Nsteps_MC, ' steps.'
         Nsteps_MC = Nsteps_MC + reminder
-        WRITE(*,*) 'Rank 0 does                 ', Nsteps_MC, ' steps.'
+        WRITE(*,*) 'Rank 0 does ', Nsteps_MC, ' steps.'
       ENDIF
 
       ! MC SAMPLING CYCLE
