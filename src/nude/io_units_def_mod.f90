@@ -15,6 +15,8 @@
        integer,   parameter   :: unit_geo_exp_h        = 39 
        integer,   parameter   :: unit_bonds_in         = 10000
        integer,   parameter   :: unit_bonds_out        = 10001
+       integer,   parameter   :: unit_dihedrals_in     = 20000
+       integer,   parameter   :: unit_dihedrals_out    = 20001
 
 
       END MODULE io_units_def
@@ -22,6 +24,6 @@
 
       MODULE mpimod
         implicit none
-        include 'mpif.h'
+        include "mpif.h"
         integer my_rank, num_procs
       END MODULE
