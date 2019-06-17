@@ -37,13 +37,13 @@ CONTAINS
   subroutine read_input
     implicit none
 
-    character(30),parameter:: inputfile='input_prunesymm.dat'
+    character(30),parameter:: inputfile='input_symm.dat'
     logical :: file_exists=.true.
 
     !! check input file existence
     inquire(file=trim(inputfile), exist=file_exists)
     if (.not.file_exists) then
-      print*, "Missing prunesymm input file. Stopping program."
+      print*, "Missing symm input file. Stopping program."
       STOP
     endif
 
