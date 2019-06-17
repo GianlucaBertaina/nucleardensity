@@ -380,7 +380,7 @@
       enddo
       !
       !
-      close(unit_cnorm)
+      close(unit_wfn)
       !
       !
       end subroutine get_wfn
