@@ -167,8 +167,10 @@ CONTAINS
   subroutine print_pruned_wavefunction
     implicit none
     !
-    integer :: K
+    integer           :: K
+    character(len=80) :: form
     !
+    write(form,'("(1F8.2,1x,",1I4,"(I3,1x),1x,1E17.10)")') nvib
     open(unit_wfn,file=trim(file_wfn_pruned),status='unknown', action="write")
     !
     Write(unit_wfn,'("# Pruned wavefunction, with character: ",1I3)') refcharacter
@@ -179,7 +181,7 @@ CONTAINS
     Write(unit_wfn,'("# ")')
     Write(unit_wfn,'("# ")')
     do K = 1, dim_K_out
-      write(unit_wfn,*) indx_out(K), h_vec_out(1:nvib,K), coef_out(K)
+      write(unit_wfn,form) indx_out(K), h_vec_out(1:nvib,K), coef_out(K)
     enddo
     !
     close(unit_wfn)
