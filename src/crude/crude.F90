@@ -120,9 +120,7 @@
            ! Wriete somethig useful in comment lines TBD
            READ(30,*) !"!comment"
            READ(30,*) !"!comment"
-           READ(30,*) nat, cubelmax,&
-                                   cubelmax,&
-                                   cubelmax
+           READ(30,*) nat, cubelmax,cubelmax,cubelmax
            READ(30,*) nxpoints, dx, zero_real, zero_real
            READ(30,*) nypoints, zero_real, dy, zero_real
            READ(30,*) nzpoints, zero_real, zero_real, dz
