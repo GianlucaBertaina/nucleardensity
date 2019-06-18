@@ -8,12 +8,12 @@ myflgs = -O3
 lib = 
 
 obj =   \
-	prunesymm.o
+	crude.F90
 
 all: compila
 
 compila: $(obj)  
-	$(fc) $(myflgs) $(obj) -o prunesymm.exe $(lib)
+	$(fc) $(myflgs) $(obj) -o crude.x $(lib)
 
 %.o : %.f
 	$(fc) $(myflgs) -c $< 
@@ -22,7 +22,7 @@ compila: $(obj)
 	$(fc) $(myflgs) -c $< 
 
 clean: 
-	rm -f *.o *.exe *.mod 
+	rm -f *.o *.x *.exe *.mod 
 
 
 
