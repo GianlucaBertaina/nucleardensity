@@ -126,6 +126,7 @@
         WRITE(*,*) 'All ',num_procs,' processes but rank 0 do ', Nsteps_MC, ' steps.'
         Nsteps_MC = Nsteps_MC + reminder
         WRITE(*,*) 'Rank 0 does ', Nsteps_MC, ' steps.'
+        flush(6)
       ENDIF
 
       ! MC SAMPLING CYCLE
