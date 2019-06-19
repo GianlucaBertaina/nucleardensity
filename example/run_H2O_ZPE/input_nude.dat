@@ -19,5 +19,11 @@ wfns_pruned.dat
 0
 #Printing MC cartesian steps? (1=yes, other no)
 1
+#Output density? (T/F)
+T
+#Output bonds file? (F = No Bonds calculation)
+input_bonds.dat
+#Output dihedralss file? (F = No Dihedrals calculation)
+F
 
 
