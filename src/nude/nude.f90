@@ -149,11 +149,7 @@
         enddo
         !
         ! Compute wfn^2/Gaussian at point qq
-        IF (switch_harm /= 1) THEN
-          call bar_wfn_squared(qq-q_eq,bar_wfn_sq)
-        ELSE
-          bar_wfn_sq = 1.d0
-        END IF
+        call bar_wfn_squared(qq-q_eq,bar_wfn_sq)
         !
         tot_int = tot_int + bar_wfn_sq
         tot_int_sq = tot_int_sq + bar_wfn_sq**2

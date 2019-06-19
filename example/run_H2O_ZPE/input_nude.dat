@@ -15,15 +15,13 @@ cnorm_H20_trasp.dat
 omegas.dat
 #Name of file with SC wfn 
 wfns_pruned.dat
-#For Harmonic density 1, otherwise *Anh*armonic
-0
 #Printing MC cartesian steps? (1=yes, other no)
 1
 #Output density? (T/F)
 T
-#Output bonds file? (F = No Bonds calculation)
+#Input bonds file (F = No Bonds calculation)
 input_bonds.dat
-#Output dihedralss file? (F = No Dihedrals calculation)
+#Input dihedrals file (F = No Dihedrals calculation)
 F
 
 
