@@ -19,7 +19,8 @@
       integer :: nxpoints, nypoints, nzpoints
       integer :: switch_print_mctraj
       character (len=80) :: file_geo, file_cnorm
-      character (len=80) :: file_wfn, file_omega,file_bonds_input,file_dihedrals_input
+      character (len=80) :: file_wfn, file_omega,file_bonds_input
+      character (len=80) :: file_angles_input,file_dihedrals_input
       !
 !!!!!! from file with eq geometry frame !!!!      
       !
@@ -48,10 +49,15 @@
       integer                       :: ndihedrals,dihedralpoints
       integer, allocatable          :: dihedral_atoms(:,:)
       character(len=30),allocatable :: dihedral_name(:)
+!!!!!! Settings for angles
+      integer                       :: nangles,anglepoints
+      integer, allocatable          :: angle_atoms(:,:)
+      character(len=30),allocatable :: angle_name(:)
 !!!!!! Options
       logical                       :: do_bonds=.false.
       logical                       :: do_densities=.false.
       logical                       :: do_dihedrals=.false.
+      logical                       :: do_angles=.false.
       !
       contains
 
@@ -84,6 +90,8 @@
       if (do_bonds) call get_bonds()
       !
       if (do_dihedrals) call get_dihedrals()
+      !
+      if (do_angles) call get_bonds()
       !
       !
       end subroutine get_input_params
@@ -136,6 +144,8 @@
       read(unit_input,*) ! Here a comment line
       read(unit_input,*) file_bonds_input ! file with bonds settings
       read(unit_input,*) ! Here a comment line
+      read(unit_input,*) file_angles_input ! file with angles settings
+      read(unit_input,*) ! Here a comment line
       read(unit_input,*) file_dihedrals_input ! file with dihedrals settings
       !
       close(unit_input)
@@ -187,6 +197,17 @@
         inquire(file=trim(file_bonds_input), exist=file_exists)
         if (.not.file_exists) then
           print*, "Missing file with bond definitions. Stopping program"
+          STOP
+        endif
+      endif
+      !
+      if (trim(file_angles_input)=="F") then
+        do_angles=.false.
+      else
+        do_angles=.true.
+        inquire(file=trim(file_angles_input), exist=file_exists)
+        if (.not.file_exists) then
+          print*, "Missing file with angle definitions. Stopping program"
           STOP
         endif
       endif
@@ -411,6 +432,32 @@
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+      subroutine get_angles()
+        use io_units_def,    only : unit_angles_in
+        implicit none
+        integer :: b
+        !
+        open(unit_angles_in,file=trim(file_angles_input),status='old', action="read")
+        read(unit_angles_in,*) ! Info
+        read(unit_angles_in,*) anglepoints
+        read(unit_angles_in,*) ! Info
+        read(unit_angles_in,*) nangles
+        allocate(angle_atoms(1:3,1:nangles))
+        allocate(angle_name(1:nangles))
+
+        do b=1,nangles
+          read(unit_angles_in,*) ! Info
+          read(unit_angles_in,*) angle_name(b)
+          read(unit_angles_in,*) ! Info
+          read(unit_angles_in,*) angle_atoms(1:3,b)
+        enddo
+
+        close(unit_angles_in)
+
+      end subroutine
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
       subroutine get_dihedrals()
         use io_units_def,    only : unit_dihedrals_in
         implicit none
@@ -424,7 +471,7 @@
         allocate(dihedral_atoms(1:4,1:ndihedrals))
         allocate(dihedral_name(1:ndihedrals))
 
-        do b=1,nbonds
+        do b=1,ndihedrals
           read(unit_dihedrals_in,*) ! Info
           read(unit_dihedrals_in,*) dihedral_name(b)
           read(unit_dihedrals_in,*) ! Info

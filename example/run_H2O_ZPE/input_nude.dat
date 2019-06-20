@@ -21,6 +21,8 @@ wfns_pruned.dat
 T
 #Input bonds file (F = No Bonds calculation)
 input_bonds.dat
+#Input angles file (F = No Angles calculation)
+F
 #Input dihedrals file (F = No Dihedrals calculation)
 F
 

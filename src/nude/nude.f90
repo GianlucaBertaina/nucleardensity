@@ -5,6 +5,7 @@
       use input_def
       use manage_cubes
       use manage_bonds
+      use manage_angles
       use mpimod
 
       implicit none
@@ -57,12 +58,20 @@
          print*, '  '
       END IF
       !
-      IF (my_rank == 0) print*, 'Setting grid and parameters for cube files'
-      call set_cube
+      if (do_densities) then
+        call set_cube
+        IF (my_rank == 0) print*, 'Setting grid and parameters for cube files'
+      endif
       !
-      IF (my_rank == 0) print*, "Setting bonds"
+      if (do_bonds) then
+        call set_bonds
+        IF (my_rank == 0) print*, "Setting bonds"
+      endif
       !
-      if (do_bonds) call set_bonds
+      if (do_angles) then
+        call set_angles
+        IF (my_rank == 0) print*, "Setting angles"
+      endif
       !
       IF (my_rank == 0) THEN
          print*,'Done'
@@ -83,6 +92,9 @@
       !
       ! Initialize bond density (1D array for each bond specified in input)
       if (do_bonds) call allocate_bonds()
+      !
+      ! Initialize angle density (1D array for each angle specified in input)
+      if (do_angles) call allocate_angles()
       !
       ! Set multivariate gaussian width vector 
       ! for husimi distribution
@@ -178,6 +190,9 @@
         ! Update bond densities
         if (do_bonds) call update_bonds(xx,bar_wfn_sq)
         !
+        ! Update angle densities
+        if (do_angles) call update_angles(xx,bar_wfn_sq)
+        !
       ENDDO
 
 
@@ -190,6 +205,8 @@
       if (do_densities) CALL MPI_REDUCE_DENSITIES()
       !
       if (do_bonds) CALL MPI_REDUCE_BONDS()
+      !
+      if (do_angles) CALL MPI_REDUCE_ANGLES()
 !!!!!!!
       ! close unit for fil with MC traj in xyz
       close(unit_trajMC+my_rank)
@@ -236,6 +253,8 @@
         if (do_densities) call print_normalized_densities(Nsteps_MC_tot,tot_int_red)
         !
         if (do_bonds) call print_normalized_bonds(Nsteps_MC_tot,tot_int_red)
+        !
+        if (do_angles) call print_normalized_angles(Nsteps_MC_tot,tot_int_red)
         !
         print*,'Done'
         print*, '  '

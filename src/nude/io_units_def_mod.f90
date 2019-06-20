@@ -17,7 +17,8 @@
        integer,   parameter   :: unit_bonds_out        = 10001
        integer,   parameter   :: unit_dihedrals_in     = 20000
        integer,   parameter   :: unit_dihedrals_out    = 20001
-
+       integer,   parameter   :: unit_angles_in        = 30000
+       integer,   parameter   :: unit_angles_out       = 30001
 
       END MODULE io_units_def
 
