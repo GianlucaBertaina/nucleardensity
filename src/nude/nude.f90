@@ -6,6 +6,7 @@
       use manage_cubes
       use manage_bonds
       use manage_angles
+      use manage_dihedrals
       use mpimod
 
       implicit none
@@ -73,6 +74,11 @@
         IF (my_rank == 0) print*, "Setting angles"
       endif
       !
+      if (do_dihedrals) then
+        call set_dihedrals
+        IF (my_rank == 0) print*, "Setting dihedrals"
+      endif
+      !
       IF (my_rank == 0) THEN
          print*,'Done'
          print*, '  '
@@ -95,6 +101,9 @@
       !
       ! Initialize angle density (1D array for each angle specified in input)
       if (do_angles) call allocate_angles()
+      !
+      ! Initialize dihedral density (1D array for each dihedral specified in input)
+      if (do_dihedrals) call allocate_dihedrals()
       !
       ! Set multivariate gaussian width vector 
       ! for husimi distribution
@@ -193,6 +202,9 @@
         ! Update angle densities
         if (do_angles) call update_angles(xx,bar_wfn_sq)
         !
+        ! Update dihedral densities
+        if (do_dihedrals) call update_dihedrals(xx,bar_wfn_sq)
+        !
       ENDDO
 
 
@@ -207,6 +219,8 @@
       if (do_bonds) CALL MPI_REDUCE_BONDS()
       !
       if (do_angles) CALL MPI_REDUCE_ANGLES()
+      !
+      if (do_dihedrals) CALL MPI_REDUCE_DIHEDRALS()
 !!!!!!!
       ! close unit for fil with MC traj in xyz
       close(unit_trajMC+my_rank)
@@ -255,6 +269,8 @@
         if (do_bonds) call print_normalized_bonds(Nsteps_MC_tot,tot_int_red)
         !
         if (do_angles) call print_normalized_angles(Nsteps_MC_tot,tot_int_red)
+        !
+        if (do_dihedrals) call print_normalized_dihedrals(Nsteps_MC_tot,tot_int_red)
         !
         print*,'Done'
         print*, '  '

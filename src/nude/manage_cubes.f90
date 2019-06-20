@@ -192,7 +192,7 @@ MODULE manage_cubes
         implicit none
 
         REAL*8, intent(in) :: density(nxpoints, nypoints, nzpoints, nat)
-        character(25) :: filename
+        character(80) :: filename
         integer :: i, j, k, iat
 
         DO iat=1, nat
@@ -284,7 +284,7 @@ MODULE manage_cubes
         implicit none
 
         REAL*8, intent(in) :: density(nxpoints, nypoints, nzpoints, nat)
-        character(25) :: filename
+        character(80) :: filename
         integer :: i, j, k, iat
 
       DO iat=1, nat
@@ -440,7 +440,7 @@ MODULE manage_bonds
 
       REAL*8, intent(in) :: density(bondpoints  , nbonds)
       REAL*8, intent(in) :: density_err(bondpoints  , nbonds)
-      character(25) :: filename
+      character(80) :: filename
       integer :: i, b
 
       DO b=1, nbonds
@@ -590,7 +590,7 @@ MODULE manage_angles
 
       REAL*8, intent(in) :: density(anglepoints  , nangles)
       REAL*8, intent(in) :: density_err(anglepoints  , nangles)
-      character(25) :: filename
+      character(80) :: filename
       integer :: i, b
 
       DO b=1, nangles
@@ -640,3 +640,176 @@ MODULE manage_angles
     END SUBROUTINE
 
 END MODULE manage_angles
+
+
+MODULE manage_dihedrals
+
+    use input_def, only : x_eq_cart, nat, ncart,dihedralpoints  , ndihedrals,dihedral_atoms,dihedral_name
+    implicit none
+    save
+
+    REAL*8, ALLOCATABLE :: dihedral_density(:,:), dihedral_density2(:,:),dihedral_density_errorbar(:,:)
+    REAL*8              :: dihedraldth,dihedralvol
+
+    INTEGER             :: dihedral_density_elem
+    REAL*8, ALLOCATABLE :: dihedral_density_red(:,:),dihedral_density2_red(:,:)
+
+    contains
+
+    SUBROUTINE set_dihedrals
+      use constants
+      implicit none
+
+      dihedraldth = 2*pi/dihedralpoints   ! Domain is -pi,+pi
+      dihedralvol = dihedraldth*180.d0/pi ! Use sessagesimal degrees
+
+    END SUBROUTINE set_dihedrals
+
+
+    SUBROUTINE allocate_dihedrals()
+
+      allocate(dihedral_density_red(1:dihedralpoints,1:ndihedrals))
+      allocate(dihedral_density2_red(1:dihedralpoints,1:ndihedrals))
+      allocate(dihedral_density(1:dihedralpoints,1:ndihedrals))
+      allocate(dihedral_density2(1:dihedralpoints,1:ndihedrals))
+      allocate(dihedral_density_errorbar(1:dihedralpoints,1:ndihedrals))
+      dihedral_density_elem = dihedralpoints * ndihedrals
+      dihedral_density_red      = 0.d0
+      dihedral_density2_red     = 0.d0
+      dihedral_density          = 0.d0
+      dihedral_density2         = 0.d0
+      dihedral_density_errorbar = 0.d0
+
+    END SUBROUTINE
+
+
+    SUBROUTINE update_dihedrals(xx,bar_wfn_sq)
+
+      real*8, intent(in) :: xx(1:ncart)
+      real*8, intent(in) :: bar_wfn_sq
+      integer            :: b,ix
+
+      do b=1,ndihedrals
+        call find_dihedral_index(xx,b,ix)
+        dihedral_density(ix,b)  = dihedral_density(ix,b)  + bar_wfn_sq
+        dihedral_density2(ix,b) = dihedral_density2(ix,b) + bar_wfn_sq**2
+      enddo
+
+    END SUBROUTINE
+
+
+    SUBROUTINE find_dihedral_index(xx,b, ir)
+    use constants
+    implicit none
+
+      INTEGER, INTENT(OUT) :: ir
+      REAL*8, INTENT(IN)   :: xx(ncart)
+      INTEGER, INTENT(IN)  :: b
+      INTEGER              :: i1,i2,i3,i4
+      REAL*8               :: b1(1:3),b2(1:3),b3(1:3),s123,s2,ang
+      REAL*8               :: v12(1:3),v23(1:3),v123(1:3)
+
+      i1 = dihedral_atoms(1,b)
+      i2 = dihedral_atoms(2,b) ! first center of dihedral
+      i3 = dihedral_atoms(3,b) ! second center of dihedral
+      i4 = dihedral_atoms(4,b)
+
+      ! https://en.wikipedia.org/wiki/Dihedral_angle
+      b1(1:3) = xx(3*i2-2:3*i2)-xx(3*i1-2:3*i1)
+      b2(1:3) = xx(3*i3-2:3*i3)-xx(3*i2-2:3*i2)
+      b3(1:3) = xx(3*i4-2:3*i4)-xx(3*i3-2:3*i3)
+
+      v12  = cross(b1,b2)
+      v23  = cross(b2,b3)
+      v123 = cross(v12,v23)
+      s123 = dot_product(v12,v23)
+      s2   = dot_product(v123,b2)/sqrt(sum(b2**2))
+
+      ang  = atan2(s2,s123)
+
+      ir = 1+INT((ang+pi) / dihedraldth) ! Shift to have positive index
+
+      CONTAINS
+
+        FUNCTION cross(a, b)
+          real*8             :: cross(1:3)
+          real*8, INTENT(IN) :: a(1:3), b(1:3)
+
+          cross(1) = a(2) * b(3) - a(3) * b(2)
+          cross(2) = a(3) * b(1) - a(1) * b(3)
+          cross(3) = a(1) * b(2) - a(2) * b(1)
+        END FUNCTION cross
+
+    END SUBROUTINE
+
+
+    SUBROUTINE MPI_REDUCE_dihedralS()
+      use mpimod
+      implicit none
+      integer :: err_mpi
+      CALL MPI_REDUCE(dihedral_density, &
+        dihedral_density_red,dihedral_density_elem,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,err_mpi)
+      CALL MPI_REDUCE(dihedral_density2, &
+        dihedral_density2_red,dihedral_density_elem,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,err_mpi)
+    END SUBROUTINE
+
+
+    SUBROUTINE print_dihedrals(density,density_err)
+      use io_units_def
+      use constants
+
+      implicit none
+
+      REAL*8, intent(in) :: density(dihedralpoints  , ndihedrals)
+      REAL*8, intent(in) :: density_err(dihedralpoints  , ndihedrals)
+      character(80) :: filename
+      integer :: i, b
+
+      DO b=1, ndihedrals
+
+        !Preparing filename string
+        WRITE(filename, "('dihedral_',1A,'.out')") adjustl(trim(dihedral_name(b)))
+
+        !associate a unit to the cube file
+        OPEN (UNIT=unit_dihedrals_out+b, FILE=trim(filename), STATUS='replace')
+
+        ! write out cube file introduction
+        WRITE(unit_dihedrals_out+b,*) "#Histogram density of dihedral. Values at the center of intervals (sessagesimal degrees)"
+        ! Use sessagesimal degrees. Shift back to -180,+180
+        WRITE(unit_dihedrals_out+b,"(3(1ES22.15,1x))") &
+          (dihedraldth*(i-0.5d0)*180.d0/pi-180.d0,density(i,b),density_err(i,b), i=1,dihedralpoints  )
+
+        CLOSE(unit_dihedrals_out+b)
+
+      ENDDO
+
+    END SUBROUTINE print_dihedrals
+
+    SUBROUTINE print_normalized_dihedrals(Nsteps_MC_tot,tot_int_red)
+      integer, intent(in) :: Nsteps_MC_tot
+      real*8,  intent(in) :: tot_int_red
+
+      integer :: b
+      !
+      dihedral_density_red  = dihedral_density_red  / tot_int_red
+      dihedral_density2_red = dihedral_density2_red / tot_int_red
+      ! Evaluation of Monte Carlo uncertainty of the mean
+      dihedral_density_errorbar = SQRT( abs(dihedral_density2_red - dihedral_density2_red**2) / Nsteps_MC_tot )
+      !
+      do b=1,ndihedrals
+        dihedral_density_red(:,b)      = dihedral_density_red(:,b) / dihedralvol
+        dihedral_density_errorbar(:,b) = dihedral_density_errorbar(:,b) / dihedralvol
+      enddo
+
+      !Check the normalization of each dihedral density
+      DO b=1, ndihedrals
+        print*, 'Check norm of dihedral distribution ',b,': ', sum(dihedral_density_red(:,b))*dihedralvol
+      END DO
+      !
+      ! Print out dihedral distributions on output files
+      print*, 'Printing dihedral files'
+      call print_dihedrals(dihedral_density_red,dihedral_density_errorbar)
+      !
+    END SUBROUTINE
+
+END MODULE manage_dihedrals

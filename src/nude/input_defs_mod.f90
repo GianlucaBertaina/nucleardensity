@@ -89,9 +89,9 @@
       !
       if (do_bonds) call get_bonds()
       !
-      if (do_dihedrals) call get_dihedrals()
-      !
       if (do_angles) call get_angles()
+      !
+      if (do_dihedrals) call get_dihedrals()
       !
       !
       end subroutine get_input_params
