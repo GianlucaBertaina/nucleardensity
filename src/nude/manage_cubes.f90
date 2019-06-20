@@ -490,3 +490,153 @@ MODULE manage_bonds
     END SUBROUTINE
 
 END MODULE manage_bonds
+
+
+MODULE manage_angles
+
+    use input_def, only : x_eq_cart, nat, ncart,anglepoints  , nangles,angle_atoms,angle_name
+    implicit none
+    save
+
+    REAL*8, ALLOCATABLE :: angle_density(:,:), angle_density2(:,:),angle_density_errorbar(:,:)
+    REAL*8              :: angledth,anglevol
+
+    INTEGER             :: angle_density_elem
+    REAL*8, ALLOCATABLE :: angle_density_red(:,:),angle_density2_red(:,:)
+
+    contains
+
+    SUBROUTINE set_angles
+      use constants
+      implicit none
+
+      angledth = pi/anglepoints     ! angles beyond 180 are not considered
+      anglevol = angledth*180.d0/pi ! Use sessagesimal degrees
+
+    END SUBROUTINE set_angles
+
+
+    SUBROUTINE allocate_angles()
+
+      allocate(angle_density_red(1:anglepoints,1:nangles))
+      allocate(angle_density2_red(1:anglepoints,1:nangles))
+      allocate(angle_density(1:anglepoints,1:nangles))
+      allocate(angle_density2(1:anglepoints,1:nangles))
+      allocate(angle_density_errorbar(1:anglepoints,1:nangles))
+      angle_density_elem = anglepoints * nangles
+      angle_density_red      = 0.d0
+      angle_density2_red     = 0.d0
+      angle_density          = 0.d0
+      angle_density2         = 0.d0
+      angle_density_errorbar = 0.d0
+
+    END SUBROUTINE
+
+
+    SUBROUTINE update_angles(xx,bar_wfn_sq)
+
+      real*8, intent(in) :: xx(1:ncart)
+      real*8, intent(in) :: bar_wfn_sq
+      integer            :: b,ix
+
+      do b=1,nangles
+        call find_angle_index(xx,b,ix)
+        angle_density(ix,b)  = angle_density(ix,b)  + bar_wfn_sq
+        angle_density2(ix,b) = angle_density2(ix,b) + bar_wfn_sq**2
+      enddo
+
+    END SUBROUTINE
+
+
+    SUBROUTINE find_angle_index(xx,b, ir)
+    implicit none
+
+      INTEGER, INTENT(OUT) :: ir
+      REAL*8, INTENT(IN)   :: xx(ncart)
+      INTEGER, INTENT(IN)  :: b
+      INTEGER              :: i,j,k
+      REAL*8               :: d1(1:3),d2(1:3),costh, ang
+
+      i = angle_atoms(1,b)
+      j = angle_atoms(2,b) ! center of angle
+      k = angle_atoms(3,b)
+
+      d1(1:3) = xx(3*i-2:3*i)-xx(3*j-2:3*j)
+      d2(1:3) = xx(3*k-2:3*k)-xx(3*j-2:3*j)
+
+      costh = dot_product(d1,d2)/sqrt(sum(d1**2)*sum(d2**2))
+
+      ang = acos(costh)
+
+      ir = 1+INT(ang / angledth)
+
+    END SUBROUTINE
+
+
+    SUBROUTINE MPI_REDUCE_ANGLES()
+      use mpimod
+      implicit none
+      integer :: err_mpi
+      CALL MPI_REDUCE(angle_density,angle_density_red,angle_density_elem,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,err_mpi)
+      CALL MPI_REDUCE(angle_density2, angle_density2_red,angle_density_elem,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,err_mpi)
+    END SUBROUTINE
+
+
+    SUBROUTINE print_angles(density,density_err)
+      use io_units_def
+      use constants
+
+      implicit none
+
+      REAL*8, intent(in) :: density(anglepoints  , nangles)
+      REAL*8, intent(in) :: density_err(anglepoints  , nangles)
+      character(25) :: filename
+      integer :: i, b
+
+      DO b=1, nangles
+
+        !Preparing filename string
+        WRITE(filename, "('angle_',1A,'.out')") adjustl(trim(angle_name(b)))
+
+        !associate a unit to the cube file
+        OPEN (UNIT=unit_angles_out+b, FILE=trim(filename), STATUS='replace')
+
+        ! write out cube file introduction
+        WRITE(unit_angles_out+b,*) "#Histogram density of angle. Values at the center of intervals (sessagesimal degrees)"
+        ! Use sessagesimal degrees
+        WRITE(unit_angles_out+b,"(3(1ES22.15,1x))") (angledth*(i-0.5d0)*180.d0/pi,density(i,b),density_err(i,b), i=1,anglepoints  )
+
+        CLOSE(unit_angles_out+b)
+
+      ENDDO
+
+    END SUBROUTINE print_angles
+
+    SUBROUTINE print_normalized_angles(Nsteps_MC_tot,tot_int_red)
+      integer, intent(in) :: Nsteps_MC_tot
+      real*8,  intent(in) :: tot_int_red
+
+      integer :: b
+      !
+      angle_density_red  = angle_density_red  / tot_int_red
+      angle_density2_red = angle_density2_red / tot_int_red
+      ! Evaluation of Monte Carlo uncertainty of the mean
+      angle_density_errorbar = SQRT( abs(angle_density2_red - angle_density2_red**2) / Nsteps_MC_tot )
+      !
+      do b=1,nangles
+        angle_density_red(:,b)      = angle_density_red(:,b) / anglevol
+        angle_density_errorbar(:,b) = angle_density_errorbar(:,b) / anglevol
+      enddo
+
+      !Check the normalization of each angle density
+      DO b=1, nangles
+        print*, 'Check norm of angle distribution ',b,': ', sum(angle_density_red(:,b))*anglevol
+      END DO
+      !
+      ! Print out angle distributions on output files
+      print*, 'Printing angle files'
+      call print_angles(angle_density_red,angle_density_errorbar)
+      !
+    END SUBROUTINE
+
+END MODULE manage_angles

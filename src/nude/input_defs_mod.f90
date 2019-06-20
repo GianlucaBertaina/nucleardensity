@@ -91,7 +91,7 @@
       !
       if (do_dihedrals) call get_dihedrals()
       !
-      if (do_angles) call get_bonds()
+      if (do_angles) call get_angles()
       !
       !
       end subroutine get_input_params
