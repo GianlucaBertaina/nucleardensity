@@ -13,7 +13,7 @@ obj =   \
 all: compila
 
 compila: $(obj)  
-	$(fc) $(myflgs) $(obj) -o crude.x $(lib)
+	$(fc) $(myflgs) $(obj) -o crude.exe $(lib)
 
 %.o : %.f
 	$(fc) $(myflgs) -c $< 
@@ -22,7 +22,7 @@ compila: $(obj)
 	$(fc) $(myflgs) -c $< 
 
 clean: 
-	rm -f *.o *.x *.exe *.mod 
+	rm -f *.o *.exe *.mod 
 
 
 
