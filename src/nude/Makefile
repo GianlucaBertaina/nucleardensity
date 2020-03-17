@@ -11,7 +11,7 @@ obj =   \
 	manage_cubes.o\
 	hermite.o\
 	calc_wfn.o\
-	nude.o
+	main.o
 
 all: compile
 

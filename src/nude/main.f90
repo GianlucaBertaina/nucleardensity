@@ -1,4 +1,4 @@
-   PROGRAM NUDE
+   PROGRAM NUCLEARDENSITY
 
       use constants
       use io_units_def
@@ -284,7 +284,7 @@
        
       call MPI_FINALIZE(err_mpi)
 
-   END PROGRAM NUDE
+   END PROGRAM NUCLEARDENSITY
 
 
 !

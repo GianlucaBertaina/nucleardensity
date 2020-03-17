@@ -69,7 +69,7 @@
       !
       implicit none
       !
-      !print*, '    reading parameters from file input_nude.dat' 
+      !print*, '    reading parameters from file input_nucleardensity.dat'
       call read_input
       !
       !print*, '    getting strcture masses from eq geometry frame:' 
