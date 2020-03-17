@@ -155,11 +155,6 @@
       tot_int_sq=0.d0
       DO istep=1,Nsteps_MC
 
-        !TODO: valutare se far stamapare questo a ogni thread
-        !IF ( MOD(istep,1000)==0 ) THEN
-        !   WRITE(*,*) istep, ' steps of ', Nsteps_MC, ' done!'
-        !END IF
-
         !
         ! Generate molecular structure in normal coordinates:
         do i = 1, nvib
@@ -233,9 +228,6 @@
         !
         q_expect_value_red(nvib+1:ncart)   = q_eq(nvib+1:ncart)
         q_expect_value_h_red(nvib+1:ncart) = q_eq(nvib+1:ncart)
-        !print*, 'q_eq    = ', q_eq
-        !print*, 'q_exp_h = ', q_expect_value_h_red
-        !print*, 'q_exp   = ', q_expect_value_red
 
         ! Bring back structures in cartesian coordinates
         call to_cartesian(x_expect_value,   q_expect_value_red)

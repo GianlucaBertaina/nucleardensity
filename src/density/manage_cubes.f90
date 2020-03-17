@@ -5,8 +5,8 @@ MODULE manage_cubes
    save
 
    REAL*8              :: cubelmax, dx, dy, dz,voxel
-   REAL*8, ALLOCATABLE :: density(:,:,:,:) !, density_sq(:,:,:,:) , density_errorbar(:,:,:,:)
-   REAL*8, ALLOCATABLE :: density_red(:,:,:,:)  !, density_sq_red(:,:,:,:)
+   REAL*8, ALLOCATABLE :: density(:,:,:,:)
+   REAL*8, ALLOCATABLE :: density_red(:,:,:,:)
    INTEGER             :: density_elem
  
    contains
@@ -61,9 +61,6 @@ MODULE manage_cubes
 !       Boundaries of the box are given by cubelmax:
 !       The grid starts at -cubelmax and ends at cubelmax along x,y,z        
 !       the central voxel is centered in the geometric center of mass
-        !dx = cubelmax*2 / REAL(nxpoints-1, 8)
-        !dy = cubelmax*2 / REAL(nypoints-1, 8)
-        !dz = cubelmax*2 / REAL(nzpoints-1, 8)
 
         dx = cubelmax*2 / REAL(nxpoints, 8)
         dy = cubelmax*2 / REAL(nypoints, 8)
@@ -71,26 +68,15 @@ MODULE manage_cubes
 
         voxel=dx*dy*dz
 
-        !print*, 'Voxels edges lenght (a.u.)'
-        !print*, 'dx =', dx
-        !print*, 'dy =', dy
-        !print*, 'dz =', dz
-
    END SUBROUTINE set_cube
 
    SUBROUTINE allocate_densities()
       ! Initialize density (a 3D array for each atom)
       allocate(density(nxpoints, nypoints, nzpoints, nat))
-      !allocate(density_sq(nxpoints, nypoints, nzpoints, nat))
       allocate(density_red(nxpoints, nypoints, nzpoints, nat))
-      !allocate(density_sq_red(nxpoints, nypoints, nzpoints, nat))
-      !allocate(density_errorbar(nxpoints, nypoints, nzpoints, nat))
       density_elem = nxpoints*nypoints*nzpoints*nat
       density           = 0.d0
       density_red       = 0.d0
-      !density_sq       = 0.d0
-      !density_sq_red   = 0.d0
-      !density_errorbar = 0.d0
    END SUBROUTINE
 
 
@@ -110,7 +96,6 @@ MODULE manage_cubes
         !
         ! Update density
         density(ix,iy,iz,i) = density(ix,iy,iz,i) + bar_wfn_sq
-        !density_sq(ix,iy,iz,i) = density_sq(ix,iy,iz,i) + bar_wfn_sq**2
         !
       enddo
 
@@ -124,43 +109,16 @@ MODULE manage_cubes
         IMPLICIT NONE 
         INTEGER, INTENT(OUT) :: ix, iy, iz
         REAL*8, INTENT(IN) :: Ri(3)
-         
-           !along x
-           !IF (Ri(1) >= 0) THEN
-           !   ix = CEILING(Ri(1)/dx)
-           !   ix = ( nxpoints / 2 ) + ix
-           !ELSE
-           !   ix = FLOOR(Ri(1)/dx)
-           !   ix = ( nxpoints / 2 ) + ix + 1
-           !END IF
 
            ix = NINT(Ri(1) / dx)
            ix = (nxpoints + 1) / 2 + ix
            IF (ix > nxpoints) ix = ix - 1
            IF (ix < 1) ix = ix + 1
 
-           !along y
-           !IF (Ri(2) >= 0) THEN
-           !   iy = CEILING(Ri(2)/dy)
-           !   iy = ( nypoints / 2 ) + iy
-           !ELSE
-           !   iy = FLOOR(Ri(2)/dy)
-           !   iy = ( nypoints / 2 ) + iy + 1
-           !END IF
-
            iy = NINT(Ri(2) / dy)
            iy = (nypoints + 1) / 2 + iy
            IF (iy > nypoints) iy = iy - 1
            IF (iy < 1) iy = iy + 1
-
-           !along z
-           !IF (Ri(3)>= 0) THEN
-           !   iz = CEILING(Ri(3)/dz)
-           !   iz = ( nzpoints / 2 ) + iz 
-           !ELSE
-           !   iz = FLOOR(Ri(3)/dz)
-           !   iz = ( nzpoints / 2 ) + iz + 1
-           !END IF
 
            iz = NINT(Ri(3) / dz)
            iz = (nzpoints + 1) / 2 + iz
@@ -177,7 +135,6 @@ MODULE manage_cubes
       integer :: err_mpi
 
       CALL MPI_REDUCE(density, density_red, density_elem, MPI_DOUBLE_PRECISION,MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
-      !CALL MPI_REDUCE(density_sq, density_sq_red, density_elem, MPI_DOUBLE_PRECISION,MPI_SUM, 0, MPI_COMM_WORLD, err_mpi)
 
     END SUBROUTINE
 
@@ -208,7 +165,7 @@ MODULE manage_cubes
           WRITE(unit_cube,*) "!voxels index order: Z, Y, X"
           ! Shifts origin of box (vertex of box) so that it corresponds to the center of
           ! the first cube in this program convention
-          ! TODO: do not shift if the main routine is modified to evaluate densities at vertices
+          ! Do not shift if the main routine is modified to evaluate densities at vertices
 
           WRITE(unit_cube,"(1I5,1x,3(1ES22.15,1x))") nat, -cubelmax + dx*0.5d0 ,&
                                                           -cubelmax + dy*0.5d0 ,&
@@ -242,22 +199,11 @@ MODULE manage_cubes
       real*8,  intent(in) :: tot_int_red
 
       integer :: ii
-      !
-      ! NO
-      !density_red = density_red / Nsteps_MC_tot
-      !density_sq_red = density_sq_red / Nsteps_MC_tot
-      !
-      ! NO
-      !density = density * (norm_gaussian_normal / Nsteps_MC)
-      !
-      ! SI'
+
       density_red = density_red / tot_int_red
-      !density_sq_red = density_sq_red / tot_int_red
-      !density_errorbar = SQRT( (density_sq_red - density_red**2) / Nsteps_MC_tot )
       !
       !Normalize by the voxel dimension
       density_red = density_red / voxel
-      !density_errorbar = density_errorbar / voxel
       !
       !Check the normalization of each nucleus density
       DO ii=1, nat
@@ -267,9 +213,6 @@ MODULE manage_cubes
       ! Print out nuclear densities on output files
       print*, 'Printing cube files'
       call print_cube(density_red)
-      !
-      ! print*, 'printing cube files with density error bar'
-      ! call print_cube_errorbar(density_errorbar)
 
     END SUBROUTINE
 
@@ -296,7 +239,6 @@ MODULE manage_cubes
         OPEN (UNIT=unit_cube, FILE=trim(filename), STATUS='replace')
 
         ! write out cube file "introdction"
-        ! Wriete somethig useful in comment lines TBD
         WRITE(unit_cube,*) "!comment"
         WRITE(unit_cube,*) "!comment"
 
@@ -363,8 +305,7 @@ MODULE manage_bonds
                      (x_eq_cart(3*i    )-x_eq_cart(3*j    ))**2  )
 
         bonddr(b)   = (dist + maxdist_plus) / bondpoints    ! Bohr
-        bondvol(b)  = bonddr(b) ! SICCOME NON ABBIAMO ROTAZIONI
-        !bondvol(b)  = 4*pi*bonddr(b)**2  ! DA VERIFICARE, SICCOME NON ABBIAMO ROTAZIONI
+        bondvol(b)  = bonddr(b)
       END DO
 
     END SUBROUTINE set_bonds
@@ -714,7 +655,6 @@ MODULE manage_dihedrals
       i3 = dihedral_atoms(3,b) ! second center of dihedral
       i4 = dihedral_atoms(4,b)
 
-      ! https://en.wikipedia.org/wiki/Dihedral_angle
       b1(1:3) = xx(3*i2-2:3*i2)-xx(3*i1-2:3*i1)
       b2(1:3) = xx(3*i3-2:3*i3)-xx(3*i2-2:3*i2)
       b3(1:3) = xx(3*i4-2:3*i4)-xx(3*i3-2:3*i3)

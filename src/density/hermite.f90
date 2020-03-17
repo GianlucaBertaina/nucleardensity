@@ -65,13 +65,11 @@ subroutine hn_polynomial_value ( n, x, p_out )
   fact = 1.0D+00
   two_power = 1.0D+00
   do j = 0, n
-    !p(j) = p(j) / sqrt ( fact * two_power * sqrt ( r8_pi ) ) ORIGINALE
     p(j) = p(j) / sqrt ( fact * two_power )
     fact = fact * real ( j + 1, kind = 8 )
     two_power = two_power * 2.0D+00
   end do
 
-! marco: 
 ! in output only n^th component
   p_out = p(n)
 
