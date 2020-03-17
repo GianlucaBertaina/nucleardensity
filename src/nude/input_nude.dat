@@ -1,19 +1,27 @@
-#Input file for NUDE SC-WFNS post processing program:
-#nat       nrotrasl
- 3          6
-#Effective harmonic basis size:
-6
-#Number of grid point in each direction (odd integer numbers)
-81 81 81
-#Number of MC steps to be performed:
-1000
-#Name of file with xyz equilibrium geometry
-h2o_eq.xyz
-#Name of file with cnorm matrix 
+# Input file for nucleardensity program
+# Natoms       Nrototraslations
+11          6
+# Effective harmonic basis size:
+1672
+# Number of grid point in each direction (odd integer numbers)
+161 161 161
+# Number of MC steps to be performed:
+100000000 
+# Name of file with xyz equilibrium geometry
+reference_geometry_Glyp.xyz
+# Name of file with matrix of normal modes
 cnorm.dat
-#Name of file with harmonic vibrational frequencies
-omegas.dat
-#Name of file with SC wfn 
-wfn.dat
-#AGGIUNGERE FILE CON BASIS SET (e togliere Effective harmonic basis set)
-
+# Name of file with harmonic vibrational frequencies
+omega_Glyp.dat
+# Name of file with SC wfn 
+wavefunction_anharm_ZPE_Glyp.dat
+# Printing MC cartesian steps? (1=yes, other no)
+0
+# Should we output nuclear densities? (T/F)
+T
+# Name of bond distributions input file (F = No output)
+input_bonds.dat
+# Name of angle distributions input file (F = No output)
+input_angles.dat
+# Name of dihedral distributions input file (F = No output)
+input_dihedrals.dat

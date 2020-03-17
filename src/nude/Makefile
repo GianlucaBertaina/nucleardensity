@@ -1,10 +1,7 @@
 #fc=gfortran
 fc=mpif90
 myflgs = -O3
-#myflgs = -fcheck=bounds -O0
-#myflgs = -fno-automatic -fcheck=bounds -O3
-# before compiling, please export LAPACK_LIB=path_of_lapack and export BLAS_LIB=path_of_blas
-#lib = -L$(LAPACK_LIB) -llapack -L$(BLAS_LIB) -lblas  
+#myflgs = -fno-automatic -fcheck=bounds -O3 
 lib = 
 
 obj =   \
@@ -16,10 +13,10 @@ obj =   \
 	calc_wfn.o\
 	nude.o
 
-all: compila
+all: compile
 
-compila: $(obj)  
-	$(fc) $(myflgs) $(obj) -o nude_par.exe $(lib)
+compile: $(obj)  
+	$(fc) $(myflgs) $(obj) -o nucleardensity $(lib)
 
 %.o : %.f
 	$(fc) $(myflgs) -c $< 
@@ -28,7 +25,7 @@ compila: $(obj)
 	$(fc) $(myflgs) -c $< 
 
 clean: 
-	rm -f *.o *.exe *.mod 
+	rm -f *.o nucleardensity *.mod 
 
 
 

@@ -102,7 +102,7 @@
 
       implicit none
 
-      character(30),parameter:: inputfile='input_nude.dat'
+      character(30),parameter:: inputfile='input_nucleardensity.dat'
 
       logical :: file_exists=.true.
 
