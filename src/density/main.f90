@@ -1,3 +1,6 @@
+! COPYRIGHT (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
+! See LICENSE for details
+
    PROGRAM NUCLEARDENSITY
 
       use constants

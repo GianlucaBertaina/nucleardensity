@@ -53,7 +53,7 @@ Give an example
 
 ## License
 
-This project is copyrighted by the above Authors - see the [LICENSE.md](LICENSE.md) file for details
+This project is copyrighted by the above Authors - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 

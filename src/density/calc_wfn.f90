@@ -1,3 +1,6 @@
+! COPYRIGHT (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
+! See LICENSE for details
+
       subroutine bar_wfn_squared(dq,wfn_b2)
 
       use input_def,  only: dim_K

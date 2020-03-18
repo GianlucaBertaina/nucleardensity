@@ -1,3 +1,6 @@
+! COPYRIGHT (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
+! See LICENSE for details
+
 !     This module reads input parameter from file and sets appropriate variables.
       MODULE input_def
 

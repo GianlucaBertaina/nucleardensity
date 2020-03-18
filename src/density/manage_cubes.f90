@@ -1,3 +1,6 @@
+! COPYRIGHT (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
+! See LICENSE for details
+
 MODULE manage_cubes
    use input_def
    implicit none
