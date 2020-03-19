@@ -235,13 +235,6 @@
                           x_eq_cart(3*i)  
            END DO
 
-           !Baricentro
-           !xbar = (x_eq_cart(3*1-2) + x_eq_cart(3*2-2) + x_eq_cart(3*3-2)) /3
-           !ybar = (x_eq_cart(3*1-1) + x_eq_cart(3*2-1) + x_eq_cart(3*3-1)) /3
-           !zbar = (x_eq_cart(3*1) + x_eq_cart(3*2) + x_eq_cart(3*3))/3
-
-           !WRITE(*,*) xbar, ybar, zbar
-
            DO i=1, nxpoints
              DO j=1, nypoints
                    READ(33,'( 6F12.6 )') (density(i, j, k), k=1,& 
@@ -258,23 +251,6 @@
            rdz = x_eq_cart(3*atom2) - x_eq_cart(3*atom1)
 
            WRITE(*,*) "Bond length", SQRT(rdx**2 + rdy**2 + rdz**2)
-
-           !Prepare starting points for the 7 straight lines
-          ! DO i=1, 7
-          !    point0(3*i-2) = x_eq_cart(3*atom1-2)
-          !    point0(3*i-1) = x_eq_cart(3*atom1-1)
-          !    point0(3*i)= x_eq_cart(3*atom1)
-          ! END DO
-          ! point0(4) = point0(4) + dp
-          ! point0(11) = point0(11) + dp
-          ! point0(18) = point0(18) + dp
-          ! point0(7) = point0(7) - dp
-          ! point0(14) = point0(14) - dp
-          ! point0(21) = point0(21) - dp
-
-          ! DO i=1, 7
-          !    WRITE(138,*) point0(3*i-2), point0(3*i-1), point0(3*i)
-          ! END DO
 
            x0 = x_eq_cart(3*atom1-2) 
            y0 = x_eq_cart(3*atom1-1)
@@ -294,10 +270,6 @@
 
            WRITE(*,*) "step", step
 
-!          cycle over the 7 straight lines
-           !cutdens = 0.d0
-           !DO sl=1, 7
-
 !             first part before atom1
               xold = x0 - rdx*401
               yold = y0 - rdy*401
@@ -305,9 +277,9 @@
 
               DO i = 1, 400
 
-                 xnew = xold + rdx !- xbar
-                 ynew = yold + rdy !- ybar
-                 znew = zold + rdz !- zbar
+                 xnew = xold + rdx
+                 ynew = yold + rdy
+                 znew = zold + rdz
                  WRITE(35,*) xnew, ynew, znew
 
                  CALL find_cube_index(nxpoints, nypoints, nzpoints,&
@@ -357,22 +329,22 @@
 
                  END IF
  
-                 xold = xnew !+ xbar
-                 yold = ynew !+ ybar
-                 zold = znew !+ zbar
+                 xold = xnew
+                 yold = ynew
+                 zold = znew
 
               END DO
 
-!             da 0 in avanti
-              xold = x0 !point0(3*sl-2)
-              yold = y0 !point0(3*sl-1)
-              zold = z0 !point0(3*sl)
+!             starting from 0
+              xold = x0
+              yold = y0
+              zold = z0
 
               DO i = 1, 400
 
-                 xnew = xold + rdx !- xbar
-                 ynew = yold + rdy !- ybar
-                 znew = zold + rdz !- zbar
+                 xnew = xold + rdx
+                 ynew = yold + rdy
+                 znew = zold + rdz
                  WRITE(35,*) xnew, ynew, znew
 
                  CALL find_cube_index(nxpoints, nypoints, nzpoints,&
@@ -422,9 +394,9 @@
 
                  END IF
 
-                 xold = xnew !+ xbar
-                 yold = ynew !+ ybar
-                 zold = znew !+ zbar
+                 xold = xnew
+                 yold = ynew
+                 zold = znew
 
               END DO
 
@@ -446,42 +418,15 @@
         INTEGER, INTENT(IN) :: nxpoints, nypoints, nzpoints
         REAL*8, INTENT(IN) :: x, y, z, dx, dy, dz
 
-           !along x
-           !IF (x >= 0) THEN
-           !   ix = CEILING(x/dx)
-           !   ix = ( nxpoints / 2 ) + ix
-           !ELSE
-           !   ix = FLOOR(x/dx)
-           !   ix = ( nxpoints / 2 ) + ix + 1
-           !END IF
-
            ix = NINT(x / dx)
            ix = (nxpoints + 1) / 2 + ix
            IF (ix > nxpoints) ix = ix - 1
            IF (ix < 1) ix = ix + 1
 
-           !along y
-           !IF (y >= 0) THEN
-           !   iy = CEILING(y/dy)
-           !   iy = ( nypoints / 2 ) + iy
-           !ELSE
-           !   iy = FLOOR(y/dy)
-           !   iy = ( nypoints / 2 ) + iy + 1
-           !END IF
-
            iy = NINT(y / dy)
            iy = (nypoints + 1) / 2 + iy
            IF (iy > nypoints) iy = iy - 1
            IF (iy < 1) iy = iy + 1
-
-           !along z
-           !IF (z>= 0) THEN
-           !   iz = CEILING(z/dz)
-           !   iz = ( nzpoints / 2 ) + iz
-           !ELSE
-           !   iz = FLOOR(z/dz)
-           !   iz = ( nzpoints / 2 ) + iz + 1
-           !END IF
 
            iz = NINT(z / dz)
            iz = (nzpoints + 1) / 2 + iz

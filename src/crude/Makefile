@@ -3,17 +3,15 @@ fc=gfortran
 myflgs = -O3
 #myflgs = -fcheck=bounds -O0
 #myflgs = -fno-automatic -fcheck=bounds -O3
-# before compiling, please export LAPACK_LIB=path_of_lapack and export BLAS_LIB=path_of_blas
-#lib = -L$(LAPACK_LIB) -llapack -L$(BLAS_LIB) -lblas  
 lib = 
 
 obj =   \
 	crude.F90
 
-all: compila
+all: compile
 
-compila: $(obj)  
-	$(fc) $(myflgs) $(obj) -o crude.exe $(lib)
+compile: $(obj)  
+	$(fc) $(myflgs) $(obj) -o crude $(lib)
 
 %.o : %.f
 	$(fc) $(myflgs) -c $< 
@@ -22,7 +20,7 @@ compila: $(obj)
 	$(fc) $(myflgs) -c $< 
 
 clean: 
-	rm -f *.o *.exe *.mod 
+	rm -f *.o crude *.mod 
 
 
 
