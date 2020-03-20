@@ -1,6 +1,6 @@
 # Semiclassical Nuclear Densities
 
-This code evaluates the nuclear density distributions, together with the bond, angle, and dihedral distributions, given the wavefunctions determined with a [semiclassical method](https://doi.org/10.1063/1.5041911), using a Monte Carlo approach. 
+This code evaluates the nuclear density distributions, together with the bond, angle, and dihedral distributions, given the wavefunctions determined with a semiclassical method [https://doi.org/10.1063/1.5041911](https://doi.org/10.1063/1.5041911), using a Monte Carlo approach. 
 
 ## Getting Started
 
@@ -8,41 +8,29 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-These instructions are given for a Linux system, where both gfortran and MPICH are installed.
+These instructions are given for a Linux system. Both gfortran, MPICH, and VMD are needed.
+
+### Installing and running the tests
+
+Enter the directory 
 
 ```
-Give examples
+run_Glyp
 ```
-
-### Installing
-
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
+and edit the script file
 
 ```
-Give the example
+evaluate.sh
 ```
 
-And repeat
+as needed, then follow the instructions inside the file. Typical parameters to be changed are the number of available CPU cores on the computer, the number of Monte Carlo steps and the number of bins for each direction.
+
+Open the resulting density diffrences with VMD using the VMD scripts in the 
 
 ```
-until finished
+run_Glyp/visualize
 ```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
+directory, as explained in the script file.
 
 ## Authors
 
