@@ -158,7 +158,7 @@
       if ((mod(nxpoints,2) == 0) .OR. &
           (mod(nypoints,2) == 0) .OR. &
           (mod(nzpoints,2) == 0)      ) then
-        print*, "number of grid points must be odd!"
+        print*, "Number of grid points must be odd!"
         STOP
       end if
       !
@@ -169,7 +169,7 @@
       inquire(file=trim(file_geo), exist=file_exists)
       if (.not.file_exists) then
         print*, "Missing file with molecular geometry at equilibrium."
-        print*,  "Stopping program"
+        print*, " Stopping program"
         STOP
       endif
       !

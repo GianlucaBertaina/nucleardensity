@@ -50,15 +50,14 @@
       !
       !
       IF (my_rank == 0) THEN
-         print*, 'Entering program:  NUclear DEnsity:'
-         print*, '  '
-         print*, '  '
+         print*, 'Entering program: NUclear DEnsity:'
+         WRITE(*,*)
       END IF
       !
       IF (my_rank == 0) print*, 'Setting parameters from input files'
       call get_input_params
       IF (my_rank == 0) THEN
-         print*, '  '
+         WRITE(*,*)
       END IF
       !
       if (do_densities) then
@@ -82,7 +81,7 @@
       endif
       !
       IF (my_rank == 0) THEN
-         print*, '  '
+         WRITE(*,*)
       END IF
       !
       !  
@@ -145,9 +144,10 @@
       reminder = MOD(Nsteps_MC, num_procs)
       Nsteps_MC = (Nsteps_MC - reminder) / num_procs
       IF (my_rank == 0) then
-        WRITE(*,'("Processes 1 to ",1I6," do ",1I12," samples")') num_procs, Nsteps_MC
+        WRITE(*,'(" Processes 1 to ",1I6," do ",1I12," samples")') num_procs, Nsteps_MC
         Nsteps_MC = Nsteps_MC + reminder
-        WRITE(*,'("Process 0 does ",1I12," samples")') Nsteps_MC
+        WRITE(*,'(" Process 0 does ",1I12," samples")') Nsteps_MC
+        WRITE(*,*)
         flush(6)
       ENDIF
 
@@ -265,12 +265,12 @@
         !
         if (do_dihedrals) call print_normalized_dihedrals(Nsteps_MC_tot,tot_int_red)
         !
-        print*, '  '
+        write(*,*)
         !
         ! call cpu_time(finish)
         t_end = MPI_WTIME()
         print '("Time for execution = ",f10.3," seconds.")', t_end-t_start
-        print*, '  '
+        write(*,*)
         !
       END IF
        
