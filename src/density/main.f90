@@ -58,7 +58,6 @@
       IF (my_rank == 0) print*, 'Setting parameters from input files'
       call get_input_params
       IF (my_rank == 0) THEN
-         print*,'Done'
          print*, '  '
       END IF
       !
@@ -83,7 +82,6 @@
       endif
       !
       IF (my_rank == 0) THEN
-         print*,'Done'
          print*, '  '
       END IF
       !
@@ -133,8 +131,8 @@
       allocate(x_expect_value(ncart)) 
       allocate(x_expect_value_h(ncart))
       !
-      ! open unit for fil with MC traj in xyz
-      IF (switch_print_mctraj == 1) THEN
+      ! open unit for file with MC traj in xyz
+      IF (print_mctraj > 0) THEN
         str1='traj'
         WRITE (str, '(I10)') my_rank
         filename = str1 // TRIM(ADJUSTL(str)) //'.xyz'
@@ -147,9 +145,9 @@
       reminder = MOD(Nsteps_MC, num_procs)
       Nsteps_MC = (Nsteps_MC - reminder) / num_procs
       IF (my_rank == 0) then
-        WRITE(*,*) 'All ',num_procs,' processes but rank 0 do ', Nsteps_MC, ' steps.'
+        WRITE(*,'("Processes 1 to ",1I6," do ",1I12," samples")') num_procs, Nsteps_MC
         Nsteps_MC = Nsteps_MC + reminder
-        WRITE(*,*) 'Rank 0 does ', Nsteps_MC, ' steps.'
+        WRITE(*,'("Process 0 does ",1I12," samples")') Nsteps_MC
         flush(6)
       ENDIF
 
@@ -177,7 +175,7 @@
         call to_cartesian(xx,qq)
         !
         ! Print out structure in xyz format on file
-        IF (Nsteps_MC <= 100000 .and. switch_print_mctraj==1) THEN
+        IF (Nsteps_MC <= print_mctraj) THEN
           write(unit_trajMC+my_rank,* ) nat
           write(unit_trajMC+my_rank,* )
           do i = 1, nat
@@ -267,7 +265,6 @@
         !
         if (do_dihedrals) call print_normalized_dihedrals(Nsteps_MC_tot,tot_int_red)
         !
-        print*,'Done'
         print*, '  '
         !
         ! call cpu_time(finish)

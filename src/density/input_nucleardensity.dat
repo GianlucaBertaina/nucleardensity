@@ -15,7 +15,7 @@ cnorm.dat
 omega_Glyp.dat
 # Name of file with SC wfn 
 wavefunction_anharm_ZPE_Glyp.dat
-# Printing MC cartesian steps? (1=yes, other no)
+# Number of printed MC samples? (0 for no output)
 0
 # Should we output nuclear densities? (T/F)
 T

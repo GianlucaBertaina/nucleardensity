@@ -20,7 +20,7 @@
       integer :: dim_K
       integer :: Nsteps_MC
       integer :: nxpoints, nypoints, nzpoints
-      integer :: switch_print_mctraj
+      integer :: print_mctraj
       character (len=80) :: file_geo, file_cnorm
       character (len=80) :: file_wfn, file_omega,file_bonds_input
       character (len=80) :: file_angles_input,file_dihedrals_input
@@ -141,7 +141,7 @@
       read(unit_input,*) ! Here a comment line
       read(unit_input,*) file_wfn ! file with SC wavefunction 
       read(unit_input,*) ! Here a comment line
-      read(unit_input,*) switch_print_mctraj! Print Mc traj 1 / Don't print /=1
+      read(unit_input,*) print_mctraj ! Number of printed MC samples
       read(unit_input,*) ! Here a comment line
       read(unit_input,*) do_densities ! option
       read(unit_input,*) ! Here a comment line
