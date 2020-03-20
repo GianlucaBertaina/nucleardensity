@@ -11,7 +11,7 @@
 
         INTEGER :: i, j, k, ii
         INTEGER :: atom1, atom2, ix, iy, iz
-        CHARACTER(len=32) :: arg, filecube1, filecube2, task
+        CHARACTER(len=500) :: arg, filecube1, filecube2, task
         REAL*8 :: coef1, coef2
         REAL*8, ALLOCATABLE, DIMENSION(:,:,:) :: density1, density2, &
                                                  density
@@ -51,7 +51,7 @@
    
            END DO
  
-        WRITE(*,*) "Input par: ", filecube1, filecube2, coef1, coef2
+        WRITE(*,*) "Input par: ", trim(filecube1), trim(filecube2), coef1, coef2
 
         ELSEIF (task=="cut") THEN
 
@@ -117,7 +117,7 @@
            OPEN (UNIT=30, FILE=filecube1, STATUS='old')
    
            ! write out cube file "introdction"
-           ! Wriete somethig useful in comment lines TBD
+           ! Write somethig useful in comment lines TBD
            READ(30,*) !"!comment"
            READ(30,*) !"!comment"
            READ(30,*) nat, cubelmax,cubelmax,cubelmax
@@ -150,7 +150,7 @@
            OPEN (UNIT=31, FILE=filecube2, STATUS='old')
    
            ! write out cube file "introdction"
-           ! Wriete somethig useful in comment lines TBD
+           ! Write somethig useful in comment lines TBD
            READ(31,*) !"!comment"
            READ(31,*) !"!comment"
            READ(31,*) nat!, -cubelmax,&
@@ -180,9 +180,9 @@
            OPEN (UNIT=32, FILE='cuberes.cube', STATUS='replace')
    
            ! write out cube file "introdction"
-           ! Wriete somethig useful in comment lines TBD
-           WRITE(32,*) "Combined cubefile form input files:"
-           WRITE(32,*) coef1, filecube1, coef2, filecube2
+           ! Write somethig useful in comment lines TBD
+           WRITE(32,*) "Combined cubefile from input files:"
+           WRITE(32,*) coef1, trim(filecube1), coef2, trim(filecube2)
            WRITE(32,*) nat, cubelmax,&
                                    cubelmax,&
                                    cubelmax
