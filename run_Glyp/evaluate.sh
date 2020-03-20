@@ -19,13 +19,13 @@
 ###  PARAMETERS  ################################################################################
 
 # Insert number of available CPU cores
-export NPROC=20
+export NPROC=2
 
 # Insert (odd) number of intervals per direction (161 in the manuscript, 61 for testing)
 export NBIN=61
 
-# Insert number of Monte Carlo samples (100000000 in the manuscript, 100000 for testing) 
-export NSTEPS=100000
+# Insert number of Monte Carlo samples (100000000 in the manuscript, 10000 for testing)
+export NSTEPS=10000
 
 #################################################################################################
 

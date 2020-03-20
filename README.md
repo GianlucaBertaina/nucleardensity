@@ -30,7 +30,7 @@ Open the resulting density diffrences with VMD using the VMD scripts in the
 ```
 run_Glyp/visualize
 ```
-directory, as explained in the script file.
+directory, as explained in the script file. Modify the Isovalue parameter in VMD opening the Graphics/Representations menu.
 
 ## Authors
 
