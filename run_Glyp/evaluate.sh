@@ -12,21 +12,22 @@
 # 1) Modify the PARAMETERS section below
 # 2) Assign execution permission: chmod +x evaluate.sh
 # 3) Launch script: ./evaluate.sh
-# 4) Open VMD scripts in visualize folder with, for example: vmd -e compare_anharmonic-harmonic_ZPE.vmd
+# 4) Open VMD scripts in visualize folder with, for example: 
+#    cd visualize; vmd -e compare_anharmonic-harmonic_ZPE.vmd
 
 
-###  PARAMETERS  #######################################################
+###  PARAMETERS  ################################################################################
 
 # Insert number of available CPU cores
 export NPROC=20
 
-# Insert (odd) number of intervals per direction (161 in the manuscript)
-export NBIN=11
+# Insert (odd) number of intervals per direction (161 in the manuscript, 61 for testing)
+export NBIN=61
 
-# Insert number of Monte Carlo samples (100000000 in the manuscript) 
+# Insert number of Monte Carlo samples (100000000 in the manuscript, 100000 for testing) 
 export NSTEPS=100000
 
-########################################################################
+#################################################################################################
 
 
 export BASE=$(pwd)
@@ -79,15 +80,19 @@ done
 
 # Evaluate differences of total densities for visualization
 pushd visualize    
+
 # Harmonic OH minus Harmonic ZPE
 level=harmonic
 $DIRCRUDE/crude comb ${BASE}/$level/OH/density_sum_${level}_OH.cube ${BASE}/$level/ZPE/density_sum_${level}_ZPE.cube 1.0 -1.0; mv cuberes.cube density_diff_OH-ZPE_${level}.cube
+
 # Anharmonic OH minus Anharmonic ZPE
 level=anharmonic
 $DIRCRUDE/crude comb ${BASE}/$level/OH/density_sum_${level}_OH.cube ${BASE}/$level/ZPE/density_sum_${level}_ZPE.cube 1.0 -1.0; mv cuberes.cube density_diff_OH-ZPE_${level}.cube
+
 # Anharmonic ZPE minus Harmonic ZPE
 state=ZPE
 $DIRCRUDE/crude comb ${BASE}/anharmonic/$state/density_sum_anharmonic_${state}.cube ${BASE}/harmonic/$state/density_sum_harmonic_${state}.cube 1.0 -1.0; mv cuberes.cube density_diff_anharmonic-harmonic_${state}.cube
+
 # Anharmonic OH minus Harmonic OH
 state=OH
 $DIRCRUDE/crude comb ${BASE}/anharmonic/$state/density_sum_anharmonic_${state}.cube ${BASE}/harmonic/$state/density_sum_harmonic_${state}.cube 1.0 -1.0; mv cuberes.cube density_diff_anharmonic-harmonic_${state}.cube
