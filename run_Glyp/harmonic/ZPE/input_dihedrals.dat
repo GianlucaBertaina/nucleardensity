@@ -1,0 +1,32 @@
+# N of points in dihedrals histogram
+800
+# N of dihedrals
+7 
+# Name
+H3-N-C2-C1
+# Atoms
+8  1  2  5
+# Name
+H1-N-C2-C1
+# Atoms
+9  1  2  5
+# Name
+H1-N-C2-H4 
+# atoms
+9  1  2  3
+# Name
+H4-C2-C1-O1    
+# atoms
+3  2  5  7
+# Name
+N-C2-C1-O1
+# atoms
+1  2  5  7
+# name
+C2-C1-O1-H6
+# atoms
+2  5  7  11
+# Name
+O2-C1-O1-H6
+# atoms
+6  5  7  11

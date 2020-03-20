@@ -1,0 +1,27 @@
+# Input file for nucleardensity program
+# Natoms       Nrototraslations
+11          6
+# Effective harmonic basis size:
+1672
+# Number of grid point in each direction (odd integer numbers)
+61 61 61
+# Number of MC steps to be performed:
+1000000  
+# Name of file with xyz equilibrium geometry
+reference_geometry_Glyp.xyz
+# Name of file with matrix of normal modes
+cnorm.dat
+# Name of file with harmonic vibrational frequencies
+omega_Glyp.dat
+# Name of file with SC wfn 
+wavefunction_anharm_ZPE_Glyp.dat
+# Number of printed MC samples? (0 for no output)
+0
+# Should we output nuclear densities? (T/F)
+T
+# Name of bond distributions input file (F = No output)
+input_bonds.dat
+# Name of angle distributions input file (F = No output)
+input_angles.dat
+# Name of dihedral distributions input file (F = No output)
+input_dihedrals.dat

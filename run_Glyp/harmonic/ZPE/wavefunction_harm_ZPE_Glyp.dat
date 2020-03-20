@@ -1,0 +1,8 @@
+# Copyright (C) 2020 Chiara Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
+#
+# Harmonic wavefunction of ground state of Glyp
+# Number of non negligible basis elements: 1 
+# 
+# Column 1 refers to index in semiclassical code. Columns 2-28 indicate number of harmonic excitations of nurmal modes. Column 29 indicates amplitude of basis element. 
+#  
+    1.00   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1.e0
