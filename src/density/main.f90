@@ -143,8 +143,8 @@
       Nsteps_MC_tot = Nsteps_MC
       reminder = MOD(Nsteps_MC, num_procs)
       Nsteps_MC = (Nsteps_MC - reminder) / num_procs
-      IF (my_rank == 0) then
-        WRITE(*,'(" Processes 1 to ",1I6," do ",1I12," samples")') num_procs, Nsteps_MC
+      IF (my_rank == 0.and.num_procs>1) then
+        WRITE(*,'(" Processes 1 to ",1I6," do ",1I12," samples")') num_procs-1, Nsteps_MC
         Nsteps_MC = Nsteps_MC + reminder
         WRITE(*,'(" Process 0 does ",1I12," samples")') Nsteps_MC
         WRITE(*,*)

@@ -37,6 +37,8 @@ for level in anharmonic harmonic; do
       $DIRCRUDE/crude comb ${sumfile} nucl_${i}.cube 1.0 1.0
       mv cuberes.cube  ${sumfile}
     done
+    tar -czvf nucl.tar.gz nucl_* ${sumfile}
+    rm nucl_*.cube
     popd
   done
   popd
