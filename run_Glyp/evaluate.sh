@@ -1,10 +1,35 @@
 #!/bin/bash
+#################################################################################################
+# COPYRIGHT (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
+# See LICENSE for details
+#################################################################################################
+
+# Script for launching the Monte Carlo program for the evaluation of the nuclear densities
+# of protonated Glycine in its ground state (ZPE) and excited OH stretch (OH) states
+# at the harmonic and semiclassical anharmonic levels
+# 
+# INSTRUCTIONS:
+# 1) Modify the PARAMETERS section below
+# 2) Assign execution permission: chmod +x evaluate.sh
+# 3) Launch script: ./evaluate.sh
+# 4) Open VMD scripts in visualize folder with, for example: vmd -e compare_anharmonic-harmonic_ZPE.vmd
+
+
+###  PARAMETERS  #######################################################
 
 # Insert number of available CPU cores
 export NPROC=20
 
-export BASE=$(pwd)
+# Insert (odd) number of intervals per direction (161 in the manuscript)
+export NBIN=11
 
+# Insert number of Monte Carlo samples (100000000 in the manuscript) 
+export NSTEPS=100000
+
+########################################################################
+
+
+export BASE=$(pwd)
 export natoms=11
 export DIRDENSITY=${BASE}"/../src/density"
 export DIRCRUDE=${BASE}"/../src/crude"
@@ -23,6 +48,9 @@ for level in anharmonic harmonic; do
   for state in ZPE OH; do
     pushd $state
     rm *out *cube *gz expect*
+    # Sets parameters
+    sed -e "7s/^.*$/${NBIN} ${NBIN} ${NBIN}/" -e "9s/^.*$/${NSTEPS}/" -i input_nucleardensity.dat
+    # Evaluates ddensities
     mpirun -n $NPROC $DIRDENSITY/nucleardensity |tee log.out
     popd
   done
