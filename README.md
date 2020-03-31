@@ -17,24 +17,42 @@ Enter the directory
 ```
 run_Glyp
 ```
-and edit the script file
+which contains the script for launching the Monte Carlo program for the evaluation of the nuclear densities of protonated Glycine in its ground state (ZPE) and excited OH stretch (OH) states at the harmonic and semiclassical anharmonic levels.
+
+Edit the script file
 
 ```
 evaluate.sh
 ```
 
-as needed, then follow the instructions inside the file. Typical parameters to be changed are the number of available CPU cores on the computer, the number of Monte Carlo steps and the number of bins for each direction.
+and modify the initial PARAMETERS section as needed. In particular, please provide the number of available CPU cores to be dedicated to the parallel Monte Carlo calculation, the number of Monte Carlo samples to be drawn, and the number of voxels for each Cartesian direction in the output cube files.
+
+Default values are provded in the script, which allow for fast testing on a laptop, while the values used in the manuscript are indicated (which imply a calculation duration of a few hours depending on the computational resources).
+
+
+Assign execution permission and launch the script
+
+```
+chmod +x evaluate.sh
+./evaluate.sh
+```
 
 Open the resulting density diffrences with VMD using the VMD scripts in the 
 
 ```
 run_Glyp/visualize
 ```
-directory, as explained in the script file. Modify the Isovalue parameter in VMD opening the Graphics/Representations menu.
+directory, with the command (as an example):
+
+```
+cd run_Glyp/visualize
+vmd -e compare_anharmonic-harmonic_ZPE.vmd
+```
+In VMD, modify the Isovalue parameter opening the Graphics/Representations menu.
 
 ## Authors
 
-* **Marco Micciarelli** - *Wavefunction evaluation*
+* **Marco Micciarelli** - *Wavefunction and density evaluation*
 * **Chiara Donatella Aieta** - *Density evaluation and parallelization*
 * **Gianluca Bertaina** - *Other observables and errorbars*
 * **Michele Ceotto** - *Supervision*
