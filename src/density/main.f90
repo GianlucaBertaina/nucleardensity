@@ -24,8 +24,6 @@
       !
       real*8  :: det_omega, norm_gaussian_normal
       !
-      integer :: idum
-      real*8  :: ran2
       real*8  :: xrand1,xrand2,y1,y2
 
 !!!!!!!MPI variables
@@ -46,7 +44,7 @@
       CALL MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, err_mpi)
       t_start = MPI_WTIME()
       !
-      idum = -200 + my_rank
+      call init_random_seed(my_rank)
       !
       !
       IF (my_rank == 0) THEN
@@ -159,8 +157,8 @@
         !
         ! Generate molecular structure in normal coordinates:
         do i = 1, nvib
-          xrand1 = ran2(idum)
-          xrand2 = ran2(idum)
+          call random_number(xrand1)
+          call random_number(xrand2)
           call Husimi(xrand1,xrand2,y1,y2,q_eq(i),sigma_gaus(i))
           qq(i) = y1
         enddo
@@ -362,6 +360,21 @@
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+      SUBROUTINE init_random_seed(rank)
+        INTEGER, INTENT(IN) :: rank
+        INTEGER :: i, n
+        INTEGER, DIMENSION(:), ALLOCATABLE :: seed
+
+        CALL RANDOM_SEED(size = n)
+        ALLOCATE(seed(n))
+
+        seed = 1299709 + rank * 19 + 37 * (/ (i - 1, i = 1, n) /)
+        CALL RANDOM_SEED(PUT = seed)
+
+        DEALLOCATE(seed)
+      END SUBROUTINE
 
 
 

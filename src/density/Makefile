@@ -5,7 +5,6 @@ myflgs = -O3
 lib = 
 
 obj =   \
-  ran2.o\
 	constants_mod.o\
 	io_units_def_mod.o\
 	input_defs_mod.o\
