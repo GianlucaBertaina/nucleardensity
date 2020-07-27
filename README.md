@@ -2,6 +2,10 @@
 
 This code evaluates the nuclear density distributions, together with the bond, angle, and dihedral distributions, given the wavefunctions determined with a semiclassical method [https://doi.org/10.1063/1.5041911](https://doi.org/10.1063/1.5041911), using a Monte Carlo approach. 
 
+If you use this code and/or the provided datasets for scientific publication, please cite the following article:
+
+C. Aieta, M. Micciarelli, G. Bertaina and M. Ceotto "Anharmonic quantum nuclear densities from full dimensional vibrational eigenfunctions with application to protonated glycine", Nat. Commun. (2020).
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for testing purposes and reproduction of the distributions for protonated Glycine.

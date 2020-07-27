@@ -1,5 +1,6 @@
-! COPYRIGHT (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
-! See LICENSE for details
+!    Semiclassical Nuclear Densities. Full notice in LICENSE file. See also README.md
+!    Copyright (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
+
 
 subroutine hn_polynomial_value ( n, x, p_out )
 

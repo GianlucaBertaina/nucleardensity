@@ -1,5 +1,6 @@
-! COPYRIGHT (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
-! See LICENSE for details
+!    Semiclassical Nuclear Densities. Full notice in LICENSE file. See also README.md
+!    Copyright (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
+
 
 !     This module contains all global units for I/O
       MODULE io_units_def

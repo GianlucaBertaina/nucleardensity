@@ -1,10 +1,17 @@
-# COPYRIGHT (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
+    Semiclassical Nuclear Densities. 
+    Copyright (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
 
-# This code, the included data, and the compiled version of it
-# can be be freely distributed, modified, and executed.
-# If this code, its derivatives, or the included data are used to produce data for scientific publication, 
-# proper citation should be made to the article with title:
-# "Anharmonic quantum nuclear densities from full dimensional vibrational eigenfunctions with application to protonated glycine" 
-# published by the same authors in Nature Communications (2020).
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-# Any further request should be directed to michele.ceotto@unimi.it.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+    Any further request should be directed to michele.ceotto@unimi.it.
