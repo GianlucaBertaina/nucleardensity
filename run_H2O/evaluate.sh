@@ -8,7 +8,7 @@
 # of water in its ground and first vibrational excited states
 # at the harmonic and semiclassical anharmonic levels
 # IMPORTANT NOTICE: indexes of normal modes are in their energetic order:
-# (bending, symm. stretching, asymm. stretching) -> BSA order, not SBA order
+# (bending, symm. stretching, asymm. stretching) -> BSA order, not standard SBA order
 # 
 # INSTRUCTIONS:
 # 1) Modify the PARAMETERS section below
@@ -23,8 +23,8 @@
 # Insert number of available CPU cores
 export NPROC=2
 
-# Insert number of Monte Carlo samples (100000000 in the manuscript, 10000 for testing)
-export NSTEPS=10000
+# Insert number of Monte Carlo samples (100000000 in the manuscript, 100000 for testing)
+export NSTEPS=100000
 
 # Insert (odd) number of intervals per direction (161 in the manuscript, 61 for testing)
 export NBIN=61
@@ -46,7 +46,7 @@ make all
 popd
 
 # Monte Carlo evaluation of nuclear densities
-for level in anharmonic harmonic; do
+for level in anharmonic harmonic DVR; do
   pushd $level
   for state in ZPE 100 200 010 001; do
     pushd $state
@@ -61,7 +61,7 @@ for level in anharmonic harmonic; do
 done
 
 # Evaluate total density as sum of marginal densities. Archive marginal densities
-for level in anharmonic harmonic; do
+for level in anharmonic harmonic DVR; do
   pushd $level
   for state in ZPE 100 200 010 001; do
     pushd $state
@@ -101,7 +101,7 @@ for state in ZPE 100 200 010 001; do
 done
 
 # Copy densities
-for level in anharmonic harmonic; do
+for level in anharmonic harmonic DVR; do
   for state in ZPE 100 200 010 001; do
     cp ${BASE}/$level/${state}/density_sum_${level}_${state}.cube .
   done
@@ -109,8 +109,10 @@ done
 
 popd
 
+echo
+echo
 echo "IMPORTANT NOTICE: indexes of normal modes are in their energetic order:"
-echo "(bending, symm. stretching, asymm. stretching)  -> BSA order, not SBA order"
+echo "(bending, symm. stretching, asymm. stretching)  -> BSA order, not standard SBA order"
 
 exit 0
 

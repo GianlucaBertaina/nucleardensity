@@ -59,7 +59,7 @@ In VMD, modify the Isovalue parameter opening the Graphics/Representations menu.
 ## IMPORTANT NOTICE
 Indexes of normal modes are in their energetic order, so for water:
 
-(bending, symm. stretching, asymm. stretching) -> BSA order, not SBA order, which is used in the article.
+(bending, symm. stretching, asymm. stretching) -> BSA order, not standard SBA order, which is used in the article.
 
 ## Authors
 
@@ -75,6 +75,6 @@ This project is copyrighted by the above Authors - see the [LICENSE](LICENSE) fi
 ## Acknowledgments
 
 * Fabio Gabas for running semiclassical simulations
-* Jaime Suarez for providing the results of the DVR calculations
+* Jaime Suarez for providing the results of the DVR calculations, from [https://doi.org/10.1063/1.5041911](https://doi.org/10.1063/1.5041911)
 * Riccardo Conte for useful discussions on the method 
 
