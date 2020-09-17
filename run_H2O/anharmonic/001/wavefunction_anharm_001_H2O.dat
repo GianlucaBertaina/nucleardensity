@@ -1,0 +1,31 @@
+#    Semiclassical Nuclear Densities. Full notice in LICENSE file. See also README.md
+#    Copyright (C) 2020 Chiara Donatella Aieta, Marco Micciarelli, Gianluca Bertaina, Michele Ceotto
+# Anharmonic wavefunction of asymmetric stretch state of H2O
+# Number of non negligible basis elements: 24 
+# 
+# Column 1 refers to index in semiclassical code. Columns 2-4 indicate number of harmonic excitations of nurmal modes. Column 5 indicates amplitude of basis element. 
+#  
+ 8652.09   0   0   1   0.9502712890E+00
+10302.25   1   0   1   0.5633325617E-01
+11952.42   2   0   1   0.1709779318E-01
+12482.21   0   1   1  -0.2913330593E+00
+14132.37   1   1   1  -0.1338794189E-01
+15782.53   2   1   1   0.2039755764E-02
+16312.33   0   2   1   0.6806390577E-01
+16534.69   0   0   3   0.1970870295E-01
+17962.49   1   2   1   0.2551158982E-02
+18184.85   1   0   3   0.6700861166E-02
+19835.02   2   0   3   0.4478959058E-02
+20142.44   0   3   1  -0.2452153486E-01
+20364.81   0   1   3  -0.4831997569E-01
+21792.61   1   3   1  -0.1151617809E-02
+22014.97   1   1   3  -0.3677525337E-02
+23665.13   2   1   3  -0.1345169073E-02
+23972.56   0   4   1   0.8717455363E-02
+24194.93   0   2   3   0.1693399866E-01
+24417.29   0   0   5   0.4325455097E-02
+27802.68   0   5   1  -0.2470553556E-02
+28025.04   0   3   3  -0.3854822964E-02
+28247.41   0   1   5  -0.1708596161E-02
+31855.16   0   4   3   0.1228326262E-02
+32077.53   0   2   5   0.1665152928E-02
