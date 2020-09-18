@@ -55,7 +55,7 @@
    
            END DO
  
-        WRITE(*,*) "Input par: ", trim(filecube1), trim(filecube2), coef1, coef2
+        WRITE(*,*) "Input par: ", trim(filecube1), " ",trim(filecube2), " ",coef1, coef2
 
         ELSEIF (task=="cut") THEN
 
@@ -76,7 +76,7 @@
    
             END DO          
  
-          WRITE(*,*) "Input par: ", filecube1, atom1, atom2
+          WRITE(*,*) "Input par: ", trim(filecube1), " ", atom1, atom2
 
         ELSEIF (task=="--help") THEN
 

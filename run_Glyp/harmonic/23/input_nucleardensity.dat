@@ -14,7 +14,7 @@ cnorm.dat
 # Name of file with harmonic vibrational frequencies
 omega_Glyp.dat
 # Name of file with SC wfn 
-wavefunction_harm_OH_Glyp.dat
+wavefunction_harm_23_Glyp.dat
 # Number of printed MC samples? (0 for no output)
 0
 # Should we output nuclear densities? (T/F)

@@ -340,7 +340,7 @@ display aodirect 0.300000
 display dof off
 display dof_fnumber 64.000000
 _isplay dof_focaldist 0.700000
-mol new density_diff_OH-ZPE_harmonic.cube type cube first 0 last -1 step 1 filebonds 1 autobonds 1 waitfor all
+mol new density_diff_25-ZPE_anharmonic.cube type cube first 0 last -1 step 1 filebonds 1 autobonds 1 waitfor all
 mol delrep 0 top
 mol representation Lines
 mol color Name
@@ -444,7 +444,7 @@ mol clipplane center 5 2 top {0.0 0.0 0.0}
 mol clipplane color  5 2 top {0.5 0.5 0.5 }
 mol clipplane normal 5 2 top {0.0 0.0 1.0}
 mol clipplane status 5 2 top {0}
-mol rename top density_diff_OH-ZPE_harmonic.cube
+mol rename top density_diff_25-ZPE_anharmonic.cube
 set viewpoints([molinfo top]) {{{1 0 0 4.33488e-08} {0 1 0 2.16744e-08} {0 0 1 1.53774e-08} {0 0 0 1}} {{1 0 0 0} {0 1 0 0} {0 0 1 0} {0 0 0 1}} {{0.306119 0 0 0} {0 0.306119 0 0} {0 0 0.306119 0} {0 0 0 1}} {{1 0 0 0} {0 1 0 0} {0 0 1 0} {0 0 0 1}}}
 lappend viewplist [molinfo top]
 set topmol [molinfo top]

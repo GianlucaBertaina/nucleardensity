@@ -5,7 +5,7 @@
 ####################################################################################################
 
 # Script for launching the Monte Carlo program for the evaluation of the nuclear densities
-# of protonated Glycine in its ground state (ZPE) and excited OH stretch (OH) states
+# of protonated Glycine in its ground state (ZPE) and excited states
 # at the harmonic and semiclassical anharmonic levels
 # 
 # INSTRUCTIONS:
@@ -46,7 +46,7 @@ popd
 # Monte Carlo evaluation of nuclear densities
 for level in anharmonic harmonic; do
   pushd $level
-  for state in ZPE OH; do
+  for state in ZPE 23 25 26 27; do
     pushd $state
     rm *out *cube *gz expect*
     # Sets parameters
@@ -61,7 +61,7 @@ done
 # Evaluate total density as sum of marginal densities. Archive marginal densities
 for level in anharmonic harmonic; do
   pushd $level
-  for state in ZPE OH; do
+  for state in ZPE 23 25 26 27; do
     pushd $state
     # Sum
     sumfile=density_sum_${level}_${state}.cube
@@ -81,21 +81,30 @@ done
 # Evaluate differences of total densities for visualization
 pushd visualize    
 
-# Harmonic OH minus Harmonic ZPE
+# Harmonic excited states minus Harmonic ZPE
 level=harmonic
-$DIRCRUDE/crude comb ${BASE}/$level/OH/density_sum_${level}_OH.cube ${BASE}/$level/ZPE/density_sum_${level}_ZPE.cube 1.0 -1.0; mv cuberes.cube density_diff_OH-ZPE_${level}.cube
+for state in 23 25 26 27; do
+  $DIRCRUDE/crude comb ${BASE}/$level/${state}/density_sum_${level}_${state}.cube ${BASE}/$level/ZPE/density_sum_${level}_ZPE.cube 1.0 -1.0; mv cuberes.cube density_diff_${state}-ZPE_${level}.cube
+done
 
-# Anharmonic OH minus Anharmonic ZPE
+# Anharmonic excited states minus Anharmonic ZPE
 level=anharmonic
-$DIRCRUDE/crude comb ${BASE}/$level/OH/density_sum_${level}_OH.cube ${BASE}/$level/ZPE/density_sum_${level}_ZPE.cube 1.0 -1.0; mv cuberes.cube density_diff_OH-ZPE_${level}.cube
+for state in 23 25 26 27; do
+  $DIRCRUDE/crude comb ${BASE}/$level/${state}/density_sum_${level}_${state}.cube ${BASE}/$level/ZPE/density_sum_${level}_ZPE.cube 1.0 -1.0; mv cuberes.cube density_diff_${state}-ZPE_${level}.cube
+done
 
-# Anharmonic ZPE minus Harmonic ZPE
-state=ZPE
-$DIRCRUDE/crude comb ${BASE}/anharmonic/$state/density_sum_anharmonic_${state}.cube ${BASE}/harmonic/$state/density_sum_harmonic_${state}.cube 1.0 -1.0; mv cuberes.cube density_diff_anharmonic-harmonic_${state}.cube
+# Anharmonic state minus corresponding Harmonic state
+for state in ZPE 23 25 26 27; do
+  $DIRCRUDE/crude comb ${BASE}/anharmonic/$state/density_sum_anharmonic_${state}.cube ${BASE}/harmonic/$state/density_sum_harmonic_${state}.cube 1.0 -1.0; mv cuberes.cube density_diff_anharmonic-harmonic_${state}.cube
+done
 
-# Anharmonic OH minus Harmonic OH
-state=OH
-$DIRCRUDE/crude comb ${BASE}/anharmonic/$state/density_sum_anharmonic_${state}.cube ${BASE}/harmonic/$state/density_sum_harmonic_${state}.cube 1.0 -1.0; mv cuberes.cube density_diff_anharmonic-harmonic_${state}.cube
+# Copy densities
+for level in anharmonic harmonic; do
+  for state in ZPE 23 25 26 27; do
+    cp ${BASE}/$level/${state}/density_sum_${level}_${state}.cube .
+  done
+done
+
 popd
 
 exit 0

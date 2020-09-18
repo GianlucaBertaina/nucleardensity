@@ -323,7 +323,7 @@ display eyesep       0.065000
 display focallength  2.000000
 display height       6.000000
 display distance     -2.000000
-display projection   Perspective
+display projection   Orthographic
 display nearclip set 0.500000
 display farclip  set 10.000000
 display depthcue   on
@@ -339,8 +339,8 @@ display aoambient 0.800000
 display aodirect 0.300000
 display dof off
 display dof_fnumber 64.000000
-_isplay dof_focaldist 0.700000
-mol new density_diff_OH-ZPE_anharmonic.cube type cube first 0 last -1 step 1 filebonds 1 autobonds 1 waitfor all
+display dof_focaldist 0.700000
+mol new density_sum_anharmonic_26.cube type cube first 0 last -1 step 1 filebonds 1 autobonds 1 waitfor all
 mol delrep 0 top
 mol representation Lines
 mol color Name
@@ -376,8 +376,8 @@ mol clipplane center 5 0 top {0.0 0.0 0.0}
 mol clipplane color  5 0 top {0.5 0.5 0.5 }
 mol clipplane normal 5 0 top {0.0 0.0 1.0}
 mol clipplane status 5 0 top {0}
-mol representation Isosurface 0.150000 0 2 0 1 1
-mol color ColorID 1
+mol representation Isosurface 2.000000 0 0 0 1 1
+mol color ColorID 2
 mol selection {all}
 mol material Opaque
 mol addrep top
@@ -410,42 +410,8 @@ mol clipplane center 5 1 top {0.0 0.0 0.0}
 mol clipplane color  5 1 top {0.5 0.5 0.5 }
 mol clipplane normal 5 1 top {0.0 0.0 1.0}
 mol clipplane status 5 1 top {0}
-mol representation Isosurface -0.150000 0 2 0 1 1
-mol color ColorID 0
-mol selection {all}
-mol material Opaque
-mol addrep top
-mol selupdate 2 top 0
-mol colupdate 2 top 0
-mol scaleminmax top 2 0.000000 0.000000
-mol smoothrep top 2 0
-mol drawframes top 2 {now}
-mol clipplane center 0 2 top {0.0 0.0 0.0}
-mol clipplane color  0 2 top {0.5 0.5 0.5 }
-mol clipplane normal 0 2 top {0.0 0.0 1.0}
-mol clipplane status 0 2 top {0}
-mol clipplane center 1 2 top {0.0 0.0 0.0}
-mol clipplane color  1 2 top {0.5 0.5 0.5 }
-mol clipplane normal 1 2 top {0.0 0.0 1.0}
-mol clipplane status 1 2 top {0}
-mol clipplane center 2 2 top {0.0 0.0 0.0}
-mol clipplane color  2 2 top {0.5 0.5 0.5 }
-mol clipplane normal 2 2 top {0.0 0.0 1.0}
-mol clipplane status 2 2 top {0}
-mol clipplane center 3 2 top {0.0 0.0 0.0}
-mol clipplane color  3 2 top {0.5 0.5 0.5 }
-mol clipplane normal 3 2 top {0.0 0.0 1.0}
-mol clipplane status 3 2 top {0}
-mol clipplane center 4 2 top {0.0 0.0 0.0}
-mol clipplane color  4 2 top {0.5 0.5 0.5 }
-mol clipplane normal 4 2 top {0.0 0.0 1.0}
-mol clipplane status 4 2 top {0}
-mol clipplane center 5 2 top {0.0 0.0 0.0}
-mol clipplane color  5 2 top {0.5 0.5 0.5 }
-mol clipplane normal 5 2 top {0.0 0.0 1.0}
-mol clipplane status 5 2 top {0}
-mol rename top density_diff_OH-ZPE_anharmonic.cube
-set viewpoints([molinfo top]) {{{1 0 0 4.33488e-08} {0 1 0 2.16744e-08} {0 0 1 1.53774e-08} {0 0 0 1}} {{1 0 0 0} {0 1 0 0} {0 0 1 0} {0 0 0 1}} {{0.306119 0 0 0} {0 0.306119 0 0} {0 0 0.306119 0} {0 0 0 1}} {{1 0 0 0} {0 1 0 0} {0 0 1 0} {0 0 0 1}}}
+mol rename top density_sum_anharmonic_26.cube
+set viewpoints([molinfo top]) {{{1 0 0 4.33488e-08} {0 1 0 2.16744e-08} {0 0 1 1.53774e-08} {0 0 0 1}} {{-0.00206515 0.000823593 -0.999996 0} {0.00187934 1 0.000819394 0} {0.999998 -0.00187755 -0.00206619 0} {0 0 0 1}} {{0.306119 0 0 0} {0 0.306119 0 0} {0 0 0.306119 0} {0 0 0 1}} {{1 0 0 0} {0 1 0 0} {0 0 1 0} {0 0 0 1}}}
 lappend viewplist [molinfo top]
 set topmol [molinfo top]
 # done with molecule 0
@@ -591,6 +557,7 @@ color scale colors WBlk {1.0 1.0 1.0} {0.5 0.5 0.5} {0.0 0.0 0.0}
     {color Segname {} blue}
     {color Conformation {all} blue}
     {color Molecule {0} blue}
+    {color Molecule {density_sum_anharmonic_26.cube} blue}
     {color Structure {3_10_Helix} blue}
     {color Surface {Grasp} gray}
     {color Labels {Springs} orange}
