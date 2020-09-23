@@ -18,9 +18,11 @@ These instructions are given for a Linux system. Both gfortran, MPICH, and VMD a
 
 ### Installing and running the tests
 
-The "run_Glyp" and "run_H2O" directories contain contain the scripts for launching the Monte Carlo program for the evaluation of the nuclear densities of protonated Glycine and of water in their ground state (ZPE) and excited states at the harmonic and semiclassical anharmonic levels.
+The "run_Glyp" and "run_H2O" directories contain the scripts for launching the Monte Carlo program for the evaluation of the nuclear densities of protonated Glycine and of water in their ground state (ZPE) and excited states at the harmonic and semiclassical anharmonic levels.
 
 In particular, both directories contain subdirectories referring to the level of theory: "harmonic", "anharmonic" (semiclassical) and "DVR" (only for water. The deepest directory level refers to the state of interest: ground state (ZPE) and normal-mode related states (see article). 
+
+In these simulation directories, the input files are named "input_..." and the reference files are "cnorm.dat" for the matrix converting normal modes to Cartesian coordinates, "omega_..." for the list of harmonic frequencies, "reference_geometry_..." for the geometry at the potential minimum, "wavefunction_..." for the wavefunction coefficients. No direct modification of the input files is necessary, in order to reproduce the results in the article.
 
 For water, we evaluate densities for the following excited states:
 
